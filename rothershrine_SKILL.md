@@ -1,10 +1,10 @@
 ---
 name: rothershrine
 display_name: Blessed Stanley Rother Shrine — National Shrine, Oklahoma City
-version: 1.1.0
+version: 1.2.0
 last_updated: 2026-08-27
-project_state: static SPA — 26 tests (5 files), lint+typecheck+test+build green, singlefile deploy (pinned)
-stack: react 19.2.8 / vite 7.3.6 / tailwind 4.3.3 (@tailwindcss/vite 4.1.17) / typescript 5.9.3 / react-router 7.18.2 / singlefile 2.3.3 / eslint 9.23 flat / vitest 3.1 jsdom / testing-library 16
+project_state: static SPA — 33 tests (26 unit + 7 E2E), lint+typecheck+test+test:e2e+build green, singlefile deploy (pinned)
+stack: react 19.2.8 / vite 7.3.6 / tailwind 4.3.3 (@tailwindcss/vite 4.1.17) / typescript 5.9.3 / react-router 7.18.2 / singlefile 2.3.3 / eslint 9.23 flat / vitest 3.1 jsdom / testing-library 16 / playwright 1.54 chromium
 rendering: static SPA (HashRouter, no SSR)
 data_layer: file-backed typed arrays in src/data/*
 deploy: vite-plugin-singlefile → dist/index.html + dist/images/ → GH Pages / S3 (publicDir copy — not inlined)
@@ -75,7 +75,7 @@ deploy: vite-plugin-singlefile → dist/index.html + dist/images/ → GH Pages /
 | Language | `typescript` / `@types/react` / `@types/react-dom` / `@types/node` | `5.9.3` / `19.2.18` / `19.2.5` / `22.20.1` | `strict` + `noUnusedLocals/Params` — breaches fail `tsc` |
 | Icons | `lucide-react` | `1.34.0` | Header/footer + `Home` quick-facts |
 | Utils | `clsx` / `tailwind-merge` | `2.1.1` / `3.6.0` | `cn()` = `twMerge(clsx(...))` — only merge path |
-| Bundling | `vite-plugin-singlefile` | `2.3.3` | Inlines JS+CSS into `dist/index.html` (~381 kB, gzip ~110 kB; `public/images/` → `dist/images/`) |
+| Bundling | `vite-plugin-singlefile` | `2.3.3` | Inlines JS+CSS into `dist/index.html` (~370 kB, gzip ~108 kB; `public/images/` → `dist/images/`) |
 | Fonts | Google Fonts (CDN, `index.html`) | — | `Fraunces` 400/500/600/700 + `Source Sans 3` 400/500/600/700; no runtime loader |
 
 **Environment:** No `.env.example`, no DB, no auth, no `docker`/`compose`. `pnpm` preferred (`--frozen-lockfile` in CI — versions pinned exact in `package.json`), `npm` works via `npm ci`. `skills/` is a symlink to `~/.pi/agent/skills` (ignored).
@@ -94,6 +94,7 @@ pnpm dev                # → http://localhost:5173 (Vite HMR)
 pnpm lint               # → eslint flat — must be clean (--max-warnings 0)
 pnpm typecheck          # → tsc --noEmit — must be silent
 pnpm test               # → vitest jsdom — 26 tests (5 files)
+pnpm test:e2e           # → playwright chromium — 7 smoke tests (e2e/smoke.spec.ts)
 pnpm build              # → dist/index.html + dist/images/ (viteSingleFile inlines JS+CSS; publicDir copied)
 pnpm preview            # → http://localhost:4173 (preview dist)
 ```
@@ -102,9 +103,11 @@ pnpm preview            # → http://localhost:4173 (preview dist)
 
 | File | Purpose | Gotcha |
 |---|---|---|
-| `vite.config.ts` | `plugins: [react(), tailwindcss(), viteSingleFile()]` + `resolve.alias["@"]` via `path.resolve(__dirname,"src")` + `test` (vitest jsdom, globals, setupFiles) | **Order matters.** `@` must stay in sync with `tsconfig.json` `paths`. Cast `test` via `as unknown as` to avoid vite 6/7 dual-install type clash. |
+| `vite.config.ts` | `plugins: [react(), tailwindcss(), viteSingleFile()]` + `resolve.alias["@"]` + `test` (vitest jsdom) + `server.watch.ignored` (skills/dist/playwright-report) | **Order matters.** `@` must stay in sync. `test` cast `as unknown` to avoid vite 6/7 clash. `server.watch.ignored` prevents `ENOSPC` from `skills` symlink. |
 | `tsconfig.json` | `ES2020`/`ESNext`/`bundler`/`react-jsx`/`strict`/`noUnused*`/`isolatedModules`/`noEmit` + `include ["src","vite.config.ts","eslint.config.js"]` + `types ["node","vitest/globals"]` | Adding a file outside `src/` requires expanding `include`. |
-| `eslint.config.js` | flat config (`@eslint/js` + `typescript-eslint 8` + `react-hooks 5` + `react-refresh` + `globals 16`) | `eslint . --max-warnings 0` — flat, no `.eslintrc`. |
+| `eslint.config.js` | flat config (`@eslint/js` + `typescript-eslint 8` + `react-hooks 5` + `react-refresh` + `globals 16`) — ignores `dist/coverage/playwright-report/test-results` | `eslint . --max-warnings 0` — flat. |
+| `playwright.config.ts` | `playwright 1.54` (chromium, `webServer` → `pnpm exec vite :5173`) | `testDir: e2e`, `baseURL: http://localhost:5173`, `reuseExistingServer: !CI`. |
+| `e2e/smoke.spec.ts` | 7 smoke tests — alias routes, hash anchors, mobile drawer, NotFound | Covers `HashRouter` double-hash (`#/what-to-see#pilgrim-center`) via `Layout.tsx` fix. |
 | `src/test/setup.ts` | vitest setup (`@testing-library/jest-dom` + IntersectionObserver mock) | jsdom lacks scrollTo/IntersectionObserver — mock there. |
 | `src/index.css` | `@import "tailwindcss"` + `@theme` (24 colors + 2 shadows) + `@layer base/utilities` | Only token source; no `tailwind.config.*` exists. |
 | `index.html` | `lang en`, `viewport`, `meta description`, preconnect `fonts.googleapis.com`, `Fraunces`+`Source Sans 3`, `#root` + `src/main.tsx` | Fonts belong here, not in JS. |
@@ -204,7 +207,7 @@ index.html (#root) → src/main.tsx (StrictMode+createRoot)
 
 No global store, no API layer, no `server/` — add only with an ADR.
 
-### 5.2 Directory Inventory (37 files — 31 source + 6 test/setup)
+### 5.2 Directory Inventory (39 files — 31 source + 6 unit/setup + 2 E2E/config)
 
 ```
 src/
@@ -441,11 +444,12 @@ Run in order — every step must be green before pushing `main` (`main` is the d
 pnpm lint                      # 1 — eslint flat --max-warnings 0
 pnpm typecheck                 # 2 — tsc --noEmit (strict)
 pnpm test                      # 3 — vitest jsdom — 26 tests (5 files)
-pnpm build                     # 4 — singlefile build → dist/index.html (~381 kB, gzip ~110 kB; + dist/images/)
-pnpm preview &                 # 5 — smoke: spot-check 10 routes + 4 hash anchors
-ls -lh dist/                   # 6 — confirm dist/index.html + dist/images/ (publicDir copy expected)
-# 7 — axe/Lighthouse a11y spot-check on Header + Home hero + FAQ
-git push origin main           # 8 — deploy (GH Pages / S3 upload of dist/index.html + dist/images/)
+pnpm test:e2e                  # 4 — playwright chromium — 7 smoke tests (e2e/smoke.spec.ts)
+pnpm build                     # 5 — singlefile build → dist/index.html (~370 kB, gzip ~108 kB; + dist/images/)
+pnpm preview &                 # 6 — smoke: spot-check 10 routes + 4 hash anchors
+ls -lh dist/                   # 7 — confirm dist/index.html + dist/images/ (publicDir copy expected)
+# 8 — axe/Lighthouse a11y spot-check on Header + Home hero + FAQ
+git push origin main           # 9 — deploy (GH Pages / S3 upload of dist/index.html + dist/images/)
 ```
 
 | Category | Check | How |
@@ -453,7 +457,8 @@ git push origin main           # 8 — deploy (GH Pages / S3 upload of dist/inde
 | Lint | `pnpm lint` clean | `eslint . --max-warnings 0` — flat config |
 | Types | `pnpm typecheck` (`npx tsc --noEmit`) clean | `strict` + `noUnused*` pass |
 | Tests | `pnpm test` — 26 passed (5 files) | `vitest` jsdom + setup `src/test/setup.ts` |
-| Build | `pnpm build` greens | `viteSingleFile` inlines JS + CSS; `dist/images/` copied from `public/` (not inlined) |
+| E2E | `pnpm test:e2e` — 7 passed (chromium) | `playwright` + `webServer` → `pnpm dev :5173` |
+| Build | `pnpm build` greens | `viteSingleFile` inlines JS + CSS; `dist/images/` copied (not inlined) — ~370 kB (≤400 kB) |
 | Routes | All 10 pages + 7 alias paths + 4 hash anchors navigate | Manual or `agent-browser` smoke |
 | A11y | Contrast ≥4.5:1 on body, `alt` on content images, `aria-expanded` on toggle | Spot-check per §8 table |
 | Visual | Hero gradients + `shadow-shrine` + `divider-weave` render | Preview comparison |
@@ -857,4 +862,4 @@ This project follows **ANALYZE → PLAN → VALIDATE → IMPLEMENT → VERIFY �
 | Images | `public/images/*.jpg` (local fallback) + Pexels CDN for hero/whatToSee (onError→local) → `dist/images/` |
 | Vite alias + singlefile | `vite.config.ts` |
 | TS strict + include | `tsconfig.json` (includes `src/data/site.ts` via `src`) |
-| Pre-ship gate | `pnpm lint && pnpm typecheck && pnpm test && pnpm build` (~381kB/110kB + dist/images/) → `pnpm preview` |
+| Pre-ship gate | `pnpm lint && pnpm typecheck && pnpm test && pnpm test:e2e && pnpm build` (~370kB/108kB + dist/images/) → `pnpm preview` |

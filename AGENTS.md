@@ -4,7 +4,7 @@
 
 ## Stack
 
-`React 19.2.8` + `Vite 7.3.6` + `Tailwind CSS 4.3.3` (`@tailwindcss/vite 4.1.17`, CSS-first `@theme` inline in `src/index.css`) + `TypeScript 5.9.3` strict + `React Router 7.18.2` `HashRouter` + `vite-plugin-singlefile 2.3.3` (primary `dist/index.html` + `dist/images/` for GH Pages / S3) + `eslint 9.23` flat + `vitest 3.1` + `@testing-library/react 16` (jsdom) · alias `@` → `src/` (sync `vite.config.ts` ↔ `tsconfig.json` `paths`) · `pnpm` preferred (`--frozen-lockfile` for CI), `npm` works · versions pinned exact in `package.json` (re-pin on upgrade, update docs)
+`React 19.2.8` + `Vite 7.3.6` + `Tailwind CSS 4.3.3` (`@tailwindcss/vite 4.1.17`, CSS-first `@theme` inline in `src/index.css`) + `TypeScript 5.9.3` strict + `React Router 7.18.2` `HashRouter` + `vite-plugin-singlefile 2.3.3` (primary `dist/index.html` + `dist/images/` for GH Pages / S3) + `eslint 9.23` flat + `vitest 3.1` + `@testing-library/react 16` (jsdom) + `playwright 1.54` (chromium) · alias `@` → `src/` (sync `vite.config.ts` ↔ `tsconfig.json` `paths`) · `pnpm` preferred (`--frozen-lockfile` for CI), `npm` works · versions pinned exact in `package.json` (re-pin on upgrade, update docs)
 
 ## Commands
 
@@ -19,7 +19,8 @@ All commands verified in `package.json` `scripts`. Don't document a script until
 | `pnpm typecheck` | Type gate `tsc --noEmit` — **run before every push** |
 | `pnpm lint` | ESLint flat (`eslint . --max-warnings 0`) |
 | `pnpm test` | Vitest `jsdom` (26 tests) |
-| `pnpm lint && pnpm typecheck && pnpm test && pnpm build` | Pre-push gate (all four must be green) |
+| `pnpm test:e2e` | Playwright `chromium` (7 smoke tests) — `playwright.config.ts` + `e2e/smoke.spec.ts` |
+| `pnpm lint && pnpm typecheck && pnpm test && pnpm test:e2e && pnpm build` | Pre-push gate (all five must be green) |
 
 ## Structure
 
@@ -36,6 +37,8 @@ src/
   test/setup.ts        # vitest jsdom setup (`@testing-library/jest-dom` + IntersectionObserver mock)
   **/*.test.{ts,tsx}   # 5 files / 26 tests adjacent to source (cn, nav, content, site, Button)
 eslint.config.js       # flat config (typescript-eslint 8 + react-hooks 5 + react-refresh)
+  playwright.config.ts # Playwright 1.54 (chromium, webServer → pnpm dev :5173)
+  e2e/smoke.spec.ts    # 7 smoke tests (alias routes + hash anchors + mobile drawer + NotFound)
 public/images/         # hero-shrine.jpg + shepherd-emblem.jpg via /images/<slug>.jpg (Vite publicDir → dist/images/ — upload alongside dist/index.html); Pexels CDN for hero/whatToSee with local fallback
 ```
 
@@ -46,10 +49,12 @@ public/images/         # hero-shrine.jpg + shepherd-emblem.jpg via /images/<slug
 - **Alias `@` must stay in sync** — `vite.config.ts` (`path.resolve(__dirname,"src")`) ↔ `tsconfig.json` (`paths: {"@/*":["src/*"]}`, `baseUrl:"."`) — change both.
 - **Tailwind v4 has no `tailwind.config.js`** — tokens live only in `src/index.css` `@theme`. Don't add arbitrary `bg-[#...]`; extend `@theme` with a named `shrine-*` token.
 - **TS strict will fail on unused code** — `noUnusedLocals:true` + `noUnusedParameters:true` + `noFallthroughCasesInSwitch:true` + `isolatedModules:true` + `noEmit:true`. Clean unused vars/params before commit.
-- **Test/lint harness: `eslint 9` flat + `vitest 3` (jsdom) + `@testing-library/react 16`** — gate is `lint && typecheck && test && build` (`26 tests` in `src/**/*.{test,spec}.tsx` via `src/test/setup.ts`).
+- **Test/lint harness: `eslint 9` flat + `vitest 3` (jsdom) + `@testing-library/react 16` + `playwright 1.54` (chromium)** — gate is `lint && typecheck && test && test:e2e && build` (`26 unit` + `7 E2E` via `src/test/setup.ts` + `e2e/smoke.spec.ts`).
 - **`skills` is a symlink** to `~/.pi/agent/skills` and is `.gitignore`d — don't commit it; resolve skill docs via the symlink.
 - **Google Fonts loaded in `index.html`** — `Fraunces` (display) + `Source Sans 3` (body). Don't add runtime font loaders in components.
-- **`Layout.tsx` handles hash scroll** — `#hash` smooth-scroll with `setTimeout` + fallback `window.scrollTo`. Preserve when extending layout.
+- **`Layout.tsx` handles hash scroll** — double-hash aware (`#/what-to-see#pilgrim-center` → split on `#` + strip `/`) + `setTimeout 80ms` + fallback `window.scrollTo`. Preserve when extending layout.
+- **`vite.config.ts` `server.watch.ignored`** — ignores `skills/**`, `dist/**`, `playwright-report/**` to avoid `ENOSPC` file-watcher limit from `skills` symlink (contains large `.venv`).
+- **`WhatToSee` jump nav** — uses `<Link to="/what-to-see#id">` (not plain `<a href="#id">`) to preserve HashRouter route; plain `#id` would replace hash and route to NotFound.
 
 ## Conventions
 

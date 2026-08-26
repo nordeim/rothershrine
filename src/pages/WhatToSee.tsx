@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { PageHero } from "@/components/PageHero";
 import { Container } from "@/components/ui/Container";
 import { Reveal } from "@/components/ui/Reveal";
@@ -19,9 +20,13 @@ export function WhatToSee() {
       <nav aria-label="Jump to section" className="sticky top-20 z-30 border-b border-shrine-stone bg-shrine-cream/95 backdrop-blur">
         <Container className="flex gap-6 overflow-x-auto py-4 text-sm font-semibold uppercase tracking-wide text-shrine-maroon-600">
           {whatToSee.map((section) => (
-            <a key={section.id} href={`#${section.id}`} className="whitespace-nowrap transition-colors hover:text-shrine-gold-600">
+            <Link
+              key={section.id}
+              to={`/what-to-see#${section.id}`}
+              className="whitespace-nowrap transition-colors hover:text-shrine-gold-600"
+            >
               {section.title}
-            </a>
+            </Link>
           ))}
         </Container>
       </nav>

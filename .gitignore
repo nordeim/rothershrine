@@ -15,3 +15,7 @@ upload/
 .claude
 .agents
 skills/
+dist/
+playwright-report/
+test-results/
+coverage/

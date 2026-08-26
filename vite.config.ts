@@ -17,6 +17,11 @@ export default defineConfig(
         "@": path.resolve(__dirname, "src"),
       },
     },
+    server: {
+      watch: {
+        ignored: ["**/skills/**", "**/node_modules/**", "**/.git/**", "**/dist/**", "**/playwright-report/**", "**/test-results/**"],
+      },
+    },
     test: {
       globals: true,
       environment: "jsdom",

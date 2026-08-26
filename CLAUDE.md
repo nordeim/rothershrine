@@ -6,7 +6,7 @@ IMPORTANT: File is read fresh for every conversation. Be brief and practical.
 
 Clone / pilgrimage site for the **National Shrine of Blessed Stanley Rother** (Oklahoma City). Tells the story of the Oklahoma farm boy turned missionary martyr in Santiago Atitlán, Guatemala — martyred July 28, 1981, beatified Sept 23, 2017 — and guides pilgrims through the Pilgrim Center, Shrine Church & Tomb Chapel, and Tepeyac Hill.
 
-**Stack:** React 19.2.8 + Vite 7.3.6 + Tailwind CSS 4.3.3 (`@tailwindcss/vite 4.1.17`) + TypeScript 5.9.3 (strict) + React Router 7.18.2 (HashRouter) + `vite-plugin-singlefile 2.3.3` (primary `dist/index.html` + `dist/images/`) + `eslint 9.23` flat + `vitest 3.1` (jsdom) + `@testing-library/react 16` · pnpm preferred (`--frozen-lockfile` in CI) · Alias `@` → `src/` · versions pinned exact in `package.json`
+**Stack:** React 19.2.8 + Vite 7.3.6 + Tailwind CSS 4.3.3 (`@tailwindcss/vite 4.1.17`) + TypeScript 5.9.3 (strict) + React Router 7.18.2 (HashRouter) + `vite-plugin-singlefile 2.3.3` (primary `dist/index.html` + `dist/images/`) + `eslint 9.23` flat + `vitest 3.1` (jsdom) + `@testing-library/react 16` + `playwright 1.54` (chromium) · pnpm preferred (`--frozen-lockfile` in CI) · Alias `@` → `src/` · versions pinned exact in `package.json`
 
 > `README.md` is the visitor-facing overview; this file is the authoritative agent onboarding doc. Keep both in sync with `package.json`, `vite.config.ts`, and `tsconfig.json`.
 
@@ -116,8 +116,10 @@ No backend, no DB, no `.env` contract yet. If env vars are added, document them 
 | `pnpm lint:fix` | ESLint auto-fix | ✅ |
 | `pnpm test` / `npm run test` | Vitest `jsdom` — `vitest run` (26 tests, 5 files) | ✅ |
 | `pnpm test:watch` | Vitest watch mode | ✅ |
+| `pnpm test:e2e` / `npm run test:e2e` | Playwright `chromium` — `playwright test` (7 smoke tests) | ✅ |
+| `pnpm test:e2e:ui` | Playwright UI mode | ✅ |
 
-> Before documenting a command as available, verify it in `package.json` scripts. Gate is now `lint && typecheck && test && build`.
+> Before documenting a command as available, verify it in `package.json` scripts. Gate is now `lint && typecheck && test && test:e2e && build`.
 
 ### Adding Tooling (wired — 2026-08-27)
 
@@ -128,11 +130,12 @@ Previous bootstrap (for reference):
 ```bash
 pnpm add -D eslint @eslint/js typescript-eslint eslint-plugin-react-hooks eslint-plugin-react-refresh globals
 pnpm add -D vitest jsdom @testing-library/react @testing-library/jest-dom @testing-library/user-event
+pnpm add -D @playwright/test && npx playwright install chromium
 ```
 
 ## Testing Strategy
 
-Current status: **wired — 26 tests across 5 files, all green.** `vitest 3.1` (jsdom) + `@testing-library/react 16` + `jsdom 26` + `src/test/setup.ts` (`@testing-library/jest-dom` + `IntersectionObserver` mock). Run `pnpm test` (run) or `pnpm test:watch` (watch). Config lives in `vite.config.ts` `test` (globals, jsdom, setupFiles, include `src/**/*.{test,spec}.{ts,tsx}`, css: true).
+Current status: **wired — 26 unit + 7 E2E, all green.** `vitest 3.1` (jsdom) + `@testing-library/react 16` + `jsdom 26` + `src/test/setup.ts` (`jest-dom` + `IntersectionObserver` mock) + `playwright 1.54` (chromium, `playwright.config.ts` + `e2e/smoke.spec.ts`). Run `pnpm test` (unit), `pnpm test:watch` (watch), `pnpm test:e2e` (E2E, `webServer` → `pnpm dev :5173`). `vitest` config lives in `vite.config.ts` `test` (globals, jsdom, setupFiles, include, css: true).
 
 Coverage so far:
 
@@ -145,8 +148,9 @@ Coverage so far:
 ### When to Add More Tests
 
 - Additional pure helpers (`src/utils/*`, selectors, content transforms) — unit tests.
-- Routing contract — `App.tsx` alias routes + hash anchors integration (MemoryRouter).
-- Critical journeys (Plan Your Visit, Give) — Playwright E2E after design stabilizes (`pnpm add -D playwright @playwright/test` → `"test:e2e": "playwright test"`).
+- Routing contract — `App.tsx` alias routes + hash anchors integration (MemoryRouter) — now covered by `e2e/smoke.spec.ts` for critical paths.
+- Critical journeys — expand `e2e/` beyond smoke: `navigation.spec.ts` (desktop hover, a11y), `what-to-see.spec.ts` (3 sections + imageAlt fallback), `give-faq.spec.ts` (Give 8 options + FAQ accordion). See `e2e/smoke.spec.ts` for pattern.
+- Visual / a11y — add `axe` scan + `playwright` trace/video (already `on-first-retry`).
 
 Conventions: `*.test.tsx` adjacent to source, `__mocks__` only when isolating `react-router-dom`, and `src/data/content.ts` factories (`getMockTimelineEntry`, `getMockWhatToSee`) for fixtures when needed.
 
@@ -193,11 +197,11 @@ pnpm build              # vite build — singlefile inlines correctly
 Gate before pushing `main` (or CI):
 
 ```bash
-pnpm lint && pnpm typecheck && pnpm test && pnpm build
+pnpm lint && pnpm typecheck && pnpm test && pnpm test:e2e && pnpm build
 git push origin main
 ```
 
-No CI workflow yet — gate is local. Add GitHub Actions when ready (lint → typecheck → test → build).
+No CI workflow yet — gate is local. Add GitHub Actions when ready (lint → typecheck → test → test:e2e → build). E2E needs `npx playwright install --with-deps chromium` in CI.
 
 Primary artifact `dist/index.html` (+ `dist/images/` copied from `public/` — `viteSingleFile` inlines JS+CSS, not `publicDir`) deploys directly to GitHub Pages (via `gh-pages` branch or `dist` artifact — upload both) or S3 — ensure hash routing remains (`HashRouter` avoids 404s on static hosts).
 
@@ -300,7 +304,7 @@ When adding vars, document them here and in `.env.example`, and guard with `impo
 
 You are done when:
 
-- `pnpm lint`, `pnpm typecheck`, `pnpm test` (26 tests), and `pnpm build` are all green.
+- `pnpm lint`, `pnpm typecheck`, `pnpm test` (26 tests), `pnpm test:e2e` (7 smoke, chromium), and `pnpm build` are all green.
 - All 10 pages + alias routes + `#hash` anchors (Pilgrim Center / Shrine Church / Tepeyac Hill, `pilgrimage#visit`) navigate correctly, including direct hash URLs on static hosts.
 - Header is sticky, `scrolled` translucency works, mobile drawer traps focus and closes on navigation, and keyboard navigation covers all nav items.
 - Content renders from `src/data/*` without inline duplication; new tokens live in `src/index.css` `@theme`.

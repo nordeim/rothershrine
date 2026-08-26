@@ -40,7 +40,8 @@ Every row below is implemented — no placeholders.
 | Icons | lucide-react | `1.34.0` | Header/footer + page iconography |
 | Utils | clsx + tailwind-merge | `2.1.1` / `3.6.0` | `cn()` class merging |
 | Bundling | vite-plugin-singlefile | `2.3.3` | Inlines JS+CSS into `dist/index.html` (`public/images/` copied to `dist/images/`) |
-| Testing | Vitest + Testing Library + jsdom | `3.1.4` / `16.2.0` / `26.1.0` | `globals: true`, `environment: jsdom`, `setupFiles: src/test/setup.ts` |
+| Testing | Vitest + Testing Library + jsdom | `3.1.4` / `16.2.0` / `26.1.0` | `globals: true`, `environment: jsdom`, `setupFiles: src/test/setup.ts` (5 files / 26 tests) |
+| E2E | Playwright | `1.54.1` | `chromium`, `webServer` → `pnpm dev :5173`, `e2e/smoke.spec.ts` (7 tests) |
 | Linting | ESLint flat + typescript-eslint + react-hooks | `9.23.0` / `8.28.0` / `5.2.0` | `eslint . --max-warnings 0`, `eslint.config.js` |
 | Fonts | Google Fonts | — | `Fraunces` (display) + `Source Sans 3` (body) via `index.html` |
 
@@ -70,9 +71,10 @@ flowchart TB
 📂 rothershrine/
 ├── 📄 index.html            # lang, viewport, meta description, Google Fonts, #root
 ├── 📄 eslint.config.js      # flat config (typescript-eslint 8 + react-hooks 5 + react-refresh)
-├── 📄 vite.config.ts        # plugins [react, tailwindcss, viteSingleFile] + alias @→src + vitest(jsdom)
+├── 📄 playwright.config.ts  # Playwright 1.54 (chromium, webServer → pnpm dev :5173)
+├── 📄 vite.config.ts        # plugins [react, tailwindcss, viteSingleFile] + alias @→src + vitest(jsdom) + server.watch.ignored
 ├── 📄 tsconfig.json         # ES2020 / ESNext / bundler / strict / @/* paths + vitest/globals
-├── 📄 package.json          # scripts: dev / build / preview / typecheck / lint / test / test:watch
+├── 📄 package.json          # scripts: dev / build / preview / typecheck / lint / test / test:e2e / test:watch
 ├── 📂 public/
 │   └── 📂 images/           # hero-shrine.jpg + shepherd-emblem.jpg via /images/*.jpg (Vite publicDir → dist/images/); whatToSee cards use Pexels CDN URLs in content.ts (local is fallback)
 ├── 📂 src/
@@ -101,6 +103,8 @@ flowchart TB
 │   └── 📂 test/
 │       └── 📄 setup.ts      # vitest setup (`@testing-library/jest-dom` + IntersectionObserver mock)
 │       (adjacent tests: `src/utils/cn.test.ts`, `src/data/{nav,content,site}.test.ts`, `src/components/ui/Button.test.tsx` — 5 files / 26 tests)
+├── 📂 e2e/
+│   └── 📄 smoke.spec.ts     # Playwright smoke (7 tests — alias routes + hash anchors + mobile drawer + NotFound)
 ├── 📂 docs/
 │   └── 📄 prompts.md        # Intent lineage
 ├── 📄 CLAUDE.md             # Deep conventions (authoritative)
@@ -125,7 +129,7 @@ pnpm dev
 
 # 4 — Production build (single file + public assets)
 pnpm build
-# → dist/index.html  ~381 kB (gzip ~110 kB), JS+CSS inlined; dist/images/ copied from public/
+# → dist/index.html  ~370 kB (gzip ~108 kB), JS+CSS inlined; dist/images/ copied from public/
 
 # Preview prod build
 pnpm preview
@@ -137,7 +141,8 @@ pnpm preview
 ```bash
 pnpm lint               # eslint flat — expect no output (clean)
 pnpm typecheck         # tsc --noEmit — expect no output (clean)
-pnpm test               # vitest jsdom — expect 26 passed
+pnpm test               # vitest jsdom — expect 5 files / 26 passed
+pnpm test:e2e           # Playwright chromium — expect 7 passed (needs Chromium installed)
 pnpm build              # expect: "✓ built in ~3s" + "Inlining: index-*.js / style-*.css"
 ls -lh dist/index.html  # expect: single HTML file, no separate assets chunk
 ```
@@ -148,7 +153,8 @@ ls -lh dist/index.html  # expect: single HTML file, no separate assets chunk
 | `pnpm lint` | Exit `0`, no warnings (`--max-warnings 0`) |
 | `pnpm typecheck` | Exit `0`, no errors |
 | `pnpm test` | `5 test files — 26 passed` |
-| `pnpm build` | `dist/index.html` exists (~381 kB, gzip ~110 kB) + `dist/images/` |
+| `pnpm test:e2e` | `7 smoke tests passed` (chromium) |
+| `pnpm build` | `dist/index.html` exists (~370 kB, gzip ~108 kB) + `dist/images/` |
 | `pnpm preview` | Prod preview on `:4173`, all alias routes + `#hash` anchors navigate |
 
 ## Design System
@@ -203,7 +209,7 @@ This repo follows the six-phase workflow in `CLAUDE.md` (ANALYZE → PLAN → VA
 - **Commits:** Conventional Commits — `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, `style:` — atomic, subject ≤72 chars.
 - **Branches:** `feat/<slug>`, `fix/<slug>`, `docs/<slug>` — short-lived (1–3 days), squash-merge.
 - **Conventions:** `PascalCase.tsx` for components/pages, `camelCase.ts` for data/utils, `PrimaryNav` single-source, alias routes preserved, `cn()` for merges, `shrine-*` tokens only.
-- **Pre-push gate:** `pnpm lint && pnpm typecheck && pnpm test && pnpm build` — all four green.
+- **Pre-push gate:** `pnpm lint && pnpm typecheck && pnpm test && pnpm test:e2e && pnpm build` — all five green.
 
 > `skills/` is a symlink to `~/.pi/agent/skills` and is `.gitignore`d — don't commit it. See `AGENTS.md` for the compact cheat sheet.
 

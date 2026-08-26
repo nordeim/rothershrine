@@ -9,10 +9,17 @@ export function Layout() {
 
   useEffect(() => {
     if (hash) {
-      const el = document.getElementById(hash.slice(1));
-      if (el) {
-        const timer = setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 80);
-        return () => clearTimeout(timer);
+      // HashRouter double-hash: #/what-to-see#pilgrim-center → split on "#" and take last segment
+      // Single hash: #visit → visit. Handles both #/route#anchor and #anchor.
+      const id = hash.includes("#") ? (hash.split("#").pop() ?? "") : hash.slice(1);
+      // strip leading "/" if present (e.g., "/pilgrim-center" → "pilgrim-center")
+      const cleanId = id.replace(/^\//, "");
+      if (cleanId) {
+        const el = document.getElementById(cleanId);
+        if (el) {
+          const timer = setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 80);
+          return () => clearTimeout(timer);
+        }
       }
     }
     window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
