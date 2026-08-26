@@ -116,7 +116,7 @@ No backend, no DB, no `.env` contract yet. If env vars are added, document them 
 | `pnpm lint:fix` | ESLint auto-fix | ✅ |
 | `pnpm test` / `npm run test` | Vitest `jsdom` — `vitest run` (26 tests, 5 files) | ✅ |
 | `pnpm test:watch` | Vitest watch mode | ✅ |
-| `pnpm test:e2e` / `npm run test:e2e` | Playwright `chromium` — `playwright test` (7 smoke tests) | ✅ |
+| `pnpm test:e2e` / `npm run test:e2e` | Playwright `chromium` — `playwright test` (20 tests: smoke 7 + navigation 5 + what-to-see 4 + give-faq 4) | ✅ |
 | `pnpm test:e2e:ui` | Playwright UI mode | ✅ |
 
 > Before documenting a command as available, verify it in `package.json` scripts. Gate is now `lint && typecheck && test && test:e2e && build`.
@@ -135,15 +135,20 @@ pnpm add -D @playwright/test && npx playwright install chromium
 
 ## Testing Strategy
 
-Current status: **wired — 26 unit + 7 E2E, all green.** `vitest 3.1` (jsdom) + `@testing-library/react 16` + `jsdom 26` + `src/test/setup.ts` (`jest-dom` + `IntersectionObserver` mock) + `playwright 1.54` (chromium, `playwright.config.ts` + `e2e/smoke.spec.ts`). Run `pnpm test` (unit), `pnpm test:watch` (watch), `pnpm test:e2e` (E2E, `webServer` → `pnpm dev :5173`). `vitest` config lives in `vite.config.ts` `test` (globals, jsdom, setupFiles, include, css: true).
+Current status: **wired — 26 unit + 20 E2E, all green (46 total).** `vitest 3.1` (jsdom) + `@testing-library/react 16` + `jsdom 26` + `src/test/setup.ts` (`jest-dom` + `IntersectionObserver` mock) + `playwright 1.54` (chromium, `playwright.config.ts` + `e2e/` 4 specs). Run `pnpm test` (unit), `pnpm test:watch` (watch), `pnpm test:e2e` (E2E, `webServer` → `pnpm dev :5173`). `vitest` config lives in `vite.config.ts` `test`.
 
-Coverage so far:
-
-- Pure helpers — `src/utils/cn.test.ts` (twMerge dedup, clsx falsy, object/array)
+Coverage so far — **unit (5 files / 26):**
+- Pure helpers — `src/utils/cn.test.ts` (twMerge dedup, clsx falsy)
 - Nav data invariants — `src/data/nav.test.ts` (6 primaryNav, 2 with children+description, hash anchors, footerNav 10)
 - Content data invariants — `src/data/content.test.ts` (lifeTimeline 8, whatToSee 3+imageAlt, faqs 6, upcomingEvents 4+category, givingOptions 8+icon)
 - Site invariants — `src/data/site.test.ts` (address, maps URLs, contact, hours)
-- UI primitive — `src/components/ui/Button.test.tsx` (to→Link, href→a, button→button, variants, icon, cn merge)
+- UI primitive — `src/components/ui/Button.test.tsx` (to→Link, href→a, button→button, variants)
+
+**E2E (4 files / 20, chromium):**
+- `e2e/smoke.spec.ts` (7) — alias routes (7 pairs), double-hash anchors, mobile drawer, NotFound
+- `e2e/navigation.spec.ts` (5) — desktop hover dropdown (`aria-expanded`), keyboard nav, SkipLink (`#main-content` focus), footer 10 links, Give top bar
+- `e2e/what-to-see.spec.ts` (4) — 3 sections + imageAlt/details, CDN fallback (`route.abort` → local hero), jump nav `Link` preserves route, Home grounds cards
+- `e2e/give-faq.spec.ts` (4) — Give 8 options + external `https://www.rothershrine.org/give`, FAQ accordion single-open (`aria-expanded`), Pilgrimage mailto + Find Us, Footer Give
 
 ### When to Add More Tests
 
@@ -304,7 +309,7 @@ When adding vars, document them here and in `.env.example`, and guard with `impo
 
 You are done when:
 
-- `pnpm lint`, `pnpm typecheck`, `pnpm test` (26 tests), `pnpm test:e2e` (7 smoke, chromium), and `pnpm build` are all green.
+- `pnpm lint`, `pnpm typecheck`, `pnpm test` (26), `pnpm test:e2e` (20, chromium), and `pnpm build` are all green (46 total).
 - All 10 pages + alias routes + `#hash` anchors (Pilgrim Center / Shrine Church / Tepeyac Hill, `pilgrimage#visit`) navigate correctly, including direct hash URLs on static hosts.
 - Header is sticky, `scrolled` translucency works, mobile drawer traps focus and closes on navigation, and keyboard navigation covers all nav items.
 - Content renders from `src/data/*` without inline duplication; new tokens live in `src/index.css` `@theme`.

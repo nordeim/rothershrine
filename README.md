@@ -41,7 +41,7 @@ Every row below is implemented — no placeholders.
 | Utils | clsx + tailwind-merge | `2.1.1` / `3.6.0` | `cn()` class merging |
 | Bundling | vite-plugin-singlefile | `2.3.3` | Inlines JS+CSS into `dist/index.html` (`public/images/` copied to `dist/images/`) |
 | Testing | Vitest + Testing Library + jsdom | `3.1.4` / `16.2.0` / `26.1.0` | `globals: true`, `environment: jsdom`, `setupFiles: src/test/setup.ts` (5 files / 26 tests) |
-| E2E | Playwright | `1.54.1` | `chromium`, `webServer` → `pnpm dev :5173`, `e2e/smoke.spec.ts` (7 tests) |
+| E2E | Playwright | `1.54.1` | `chromium`, `webServer` → `pnpm dev :5173`, `e2e/` (20 tests: smoke 7 + navigation 5 + what-to-see 4 + give-faq 4) |
 | Linting | ESLint flat + typescript-eslint + react-hooks | `9.23.0` / `8.28.0` / `5.2.0` | `eslint . --max-warnings 0`, `eslint.config.js` |
 | Fonts | Google Fonts | — | `Fraunces` (display) + `Source Sans 3` (body) via `index.html` |
 
@@ -104,7 +104,12 @@ flowchart TB
 │       └── 📄 setup.ts      # vitest setup (`@testing-library/jest-dom` + IntersectionObserver mock)
 │       (adjacent tests: `src/utils/cn.test.ts`, `src/data/{nav,content,site}.test.ts`, `src/components/ui/Button.test.tsx` — 5 files / 26 tests)
 ├── 📂 e2e/
-│   └── 📄 smoke.spec.ts     # Playwright smoke (7 tests — alias routes + hash anchors + mobile drawer + NotFound)
+│   ├── 📄 smoke.spec.ts     # 7 smoke (alias routes + hash anchors + mobile drawer + NotFound)
+│   ├── 📄 navigation.spec.ts# 5 desktop hover + keyboard + skip + footer + Give
+│   ├── 📄 what-to-see.spec.ts# 4 sections + imageAlt + fallback + jump nav
+│   ├── 📄 give-faq.spec.ts  # 4 Give 8 options + FAQ accordion + Pilgrimage mailto
+│   └── 📄 helpers.ts        # gotoHash helper
+├── 📄 .github/workflows/ci.yml # CI: lint → typecheck → test → test:e2e → build
 ├── 📂 docs/
 │   └── 📄 prompts.md        # Intent lineage
 ├── 📄 CLAUDE.md             # Deep conventions (authoritative)
@@ -153,7 +158,7 @@ ls -lh dist/index.html  # expect: single HTML file, no separate assets chunk
 | `pnpm lint` | Exit `0`, no warnings (`--max-warnings 0`) |
 | `pnpm typecheck` | Exit `0`, no errors |
 | `pnpm test` | `5 test files — 26 passed` |
-| `pnpm test:e2e` | `7 smoke tests passed` (chromium) |
+| `pnpm test:e2e` | `20 tests passed` (smoke 7 + navigation 5 + what-to-see 4 + give-faq 4, chromium) |
 | `pnpm build` | `dist/index.html` exists (~370 kB, gzip ~108 kB) + `dist/images/` |
 | `pnpm preview` | Prod preview on `:4173`, all alias routes + `#hash` anchors navigate |
 
