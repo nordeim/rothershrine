@@ -6,7 +6,7 @@ IMPORTANT: File is read fresh for every conversation. Be brief and practical.
 
 Clone / pilgrimage site for the **National Shrine of Blessed Stanley Rother** (Oklahoma City). Tells the story of the Oklahoma farm boy turned missionary martyr in Santiago Atitlán, Guatemala — martyred July 28, 1981, beatified Sept 23, 2017 — and guides pilgrims through the Pilgrim Center, Shrine Church & Tomb Chapel, and Tepeyac Hill.
 
-**Stack:** React 19.2.8 + Vite 7.3.6 + Tailwind CSS 4.3.3 (`@tailwindcss/vite 4.1.17`) + TypeScript 5.9.3 (strict) + React Router 7.18.2 (HashRouter) + `vite-plugin-singlefile 2.3.3` (primary `dist/index.html` + `dist/images/`) · pnpm preferred (`--frozen-lockfile` in CI) · Alias `@` → `src/` · versions pinned exact in `package.json`
+**Stack:** React 19.2.8 + Vite 7.3.6 + Tailwind CSS 4.3.3 (`@tailwindcss/vite 4.1.17`) + TypeScript 5.9.3 (strict) + React Router 7.18.2 (HashRouter) + `vite-plugin-singlefile 2.3.3` (primary `dist/index.html` + `dist/images/`) + `eslint 9.23` flat + `vitest 3.1` (jsdom) + `@testing-library/react 16` · pnpm preferred (`--frozen-lockfile` in CI) · Alias `@` → `src/` · versions pinned exact in `package.json`
 
 > `README.md` is the visitor-facing overview; this file is the authoritative agent onboarding doc. Keep both in sync with `package.json`, `vite.config.ts`, and `tsconfig.json`.
 
@@ -111,52 +111,56 @@ No backend, no DB, no `.env` contract yet. If env vars are added, document them 
 | `pnpm dev` / `npm run dev` | Vite dev server with HMR (default http://localhost:5173) | ✅ in `package.json` |
 | `pnpm build` / `npm run build` | Production single-file build (`vite build` + `viteSingleFile`) → `dist/index.html` | ✅ |
 | `pnpm preview` / `npm run preview` | Preview `dist` build locally | ✅ |
-| `pnpm typecheck` | Add as `tsc --noEmit` (not yet in scripts — add when wiring CI) | ➕ TODO |
-| `pnpm lint` | Add as `tsc --noEmit && eslint .` (no ESLint config yet — add before enforcing) | ➕ TODO |
+| `pnpm typecheck` / `npm run typecheck` | Type gate `tsc --noEmit` | ✅ |
+| `pnpm lint` / `npm run lint` | ESLint flat `eslint . --max-warnings 0` (`eslint.config.js`) | ✅ |
+| `pnpm lint:fix` | ESLint auto-fix | ✅ |
+| `pnpm test` / `npm run test` | Vitest `jsdom` — `vitest run` (26 tests, 5 files) | ✅ |
+| `pnpm test:watch` | Vitest watch mode | ✅ |
 
-> Before documenting a command as available, verify it in `package.json` scripts. This project currently ships **only** `dev / build / preview`.
+> Before documenting a command as available, verify it in `package.json` scripts. Gate is now `lint && typecheck && test && build`.
 
-### Adding Tooling (when needed)
+### Adding Tooling (wired — 2026-08-27)
+
+Wired: `eslint 9.23` flat + `typescript-eslint 8.28` + `eslint-plugin-react-hooks 5.2` + `eslint-plugin-react-refresh 0.4` + `globals 16` → `eslint.config.js` (flat) + `vitest 3.1` + `jsdom 26` + `@testing-library/react 16` + `@testing-library/jest-dom 6` + `@testing-library/user-event 14` → `vite.config.ts` `test` + `src/test/setup.ts` (jest-dom + IntersectionObserver mock). Scripts added: `typecheck`, `lint`, `lint:fix`, `test`, `test:watch`, `test:coverage`.
+
+Previous bootstrap (for reference):
 
 ```bash
-pnpm add -D eslint @types/node  # @types/node already present
-pnpm add -D eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin eslint-plugin-react-hooks
-pnpm add -D prettier eslint-config-prettier
-# then add "lint": "eslint . --max-warnings 0" and "typecheck": "tsc --noEmit" to package.json scripts
+pnpm add -D eslint @eslint/js typescript-eslint eslint-plugin-react-hooks eslint-plugin-react-refresh globals
+pnpm add -D vitest jsdom @testing-library/react @testing-library/jest-dom @testing-library/user-event
 ```
 
 ## Testing Strategy
 
-Current status: **no test harness installed.** TDD intent applies to logic; pure presentation does not require a framework until complexity warrants it.
+Current status: **wired — 26 tests across 5 files, all green.** `vitest 3.1` (jsdom) + `@testing-library/react 16` + `jsdom 26` + `src/test/setup.ts` (`@testing-library/jest-dom` + `IntersectionObserver` mock). Run `pnpm test` (run) or `pnpm test:watch` (watch). Config lives in `vite.config.ts` `test` (globals, jsdom, setupFiles, include `src/**/*.{test,spec}.{ts,tsx}`, css: true).
 
-### When to Add Tests
+Coverage so far:
 
-- Pure helpers (`utils/*`, selectors, content transforms) — unit tests.
-- Routing / nav data invariants — contract tests.
-- Critical journeys (Plan Your Visit, Give) — Playwright E2E after design stabilizes.
+- Pure helpers — `src/utils/cn.test.ts` (twMerge dedup, clsx falsy, object/array)
+- Nav data invariants — `src/data/nav.test.ts` (6 primaryNav, 2 with children+description, hash anchors, footerNav 10)
+- Content data invariants — `src/data/content.test.ts` (lifeTimeline 8, whatToSee 3+imageAlt, faqs 6, upcomingEvents 4+category, givingOptions 8+icon)
+- Site invariants — `src/data/site.test.ts` (address, maps URLs, contact, hours)
+- UI primitive — `src/components/ui/Button.test.tsx` (to→Link, href→a, button→button, variants, icon, cn merge)
 
-### Recommended Wiring (future)
+### When to Add More Tests
 
-```bash
-pnpm add -D vitest @testing-library/react @testing-library/jest-dom jsdom
-pnpm add -D playwright @playwright/test
-# package.json additions:
-# "test": "vitest run"
-# "test:watch": "vitest"
-# "test:e2e": "playwright test"
-```
+- Additional pure helpers (`src/utils/*`, selectors, content transforms) — unit tests.
+- Routing contract — `App.tsx` alias routes + hash anchors integration (MemoryRouter).
+- Critical journeys (Plan Your Visit, Give) — Playwright E2E after design stabilizes (`pnpm add -D playwright @playwright/test` → `"test:e2e": "playwright test"`).
 
-Conventions when introduced: `*.test.tsx` adjacent to source, `__mocks__` only when isolating `react-router-dom`, and `src/data/content.ts` factories (`getMockTimelineEntry`, `getMockWhatToSee`) for fixtures.
+Conventions: `*.test.tsx` adjacent to source, `__mocks__` only when isolating `react-router-dom`, and `src/data/content.ts` factories (`getMockTimelineEntry`, `getMockWhatToSee`) for fixtures when needed.
 
 ## Code Quality Standards
 
-### Linting & Formatting (to be added)
+### Linting & Formatting (wired)
 
-Target: ESLint flat config + Prettier, TypeScript-aware. Until wired, `tsc --noEmit` is the gate. Proposed gate for pre-ship:
+`eslint 9.23` flat config (`eslint.config.js`) — `typescript-eslint 8.28` + `eslint-plugin-react-hooks 5.2` + `eslint-plugin-react-refresh 0.4` + `globals 16`. Run `pnpm lint` (`eslint . --max-warnings 0`) and `pnpm lint:fix` for auto-fix. Gate for pre-ship:
 
 ```bash
-npx tsc --noEmit
-npm run build   # must succeed (single-file inlines correctly)
+pnpm lint               # eslint flat — no warnings
+pnpm typecheck          # tsc --noEmit
+pnpm test               # vitest jsdom — 26 tests
+pnpm build              # vite build — singlefile inlines correctly
 ```
 
 ### Type Safety
@@ -186,12 +190,14 @@ npm run build   # must succeed (single-file inlines correctly)
 
 ### Push / Deploy
 
-No CI gate yet. Manual verify before pushing:
+Gate before pushing `main` (or CI):
 
 ```bash
-npx tsc --noEmit && npm run build
+pnpm lint && pnpm typecheck && pnpm test && pnpm build
 git push origin main
 ```
+
+No CI workflow yet — gate is local. Add GitHub Actions when ready (lint → typecheck → test → build).
 
 Primary artifact `dist/index.html` (+ `dist/images/` copied from `public/` — `viteSingleFile` inlines JS+CSS, not `publicDir`) deploys directly to GitHub Pages (via `gh-pages` branch or `dist` artifact — upload both) or S3 — ensure hash routing remains (`HashRouter` avoids 404s on static hosts).
 
@@ -247,7 +253,7 @@ public/
 - Data/utils: `camelCase.ts` (`content.ts`, `cn.ts`).
 - Pages: `PascalCase.tsx` matching route intent (`Pilgrimage.tsx`, `WhatToSee.tsx`).
 - Assets: `public/images/<slug>.jpg` — hero/emblem reference as `/images/<slug>.jpg` (absolute from root, Vite `publicDir` → `dist/images/` — upload alongside `dist/index.html`; singlefile does not inline `public/`). WhatToSee cards use Pexels CDN URLs in `src/data/content.ts`.
-- Tests (future): `*.test.tsx` adjacent to source.
+- Tests: `*.test.tsx` adjacent to source — `src/utils/cn.test.ts`, `src/data/{nav,content,site}.test.ts`, `src/components/ui/Button.test.tsx` (5 files / 26 tests) + `src/test/setup.ts`.
 
 ### Design System
 
@@ -294,7 +300,7 @@ When adding vars, document them here and in `.env.example`, and guard with `impo
 
 You are done when:
 
-- `npx tsc --noEmit` and `npm run build` are green.
+- `pnpm lint`, `pnpm typecheck`, `pnpm test` (26 tests), and `pnpm build` are all green.
 - All 10 pages + alias routes + `#hash` anchors (Pilgrim Center / Shrine Church / Tepeyac Hill, `pilgrimage#visit`) navigate correctly, including direct hash URLs on static hosts.
 - Header is sticky, `scrolled` translucency works, mobile drawer traps focus and closes on navigation, and keyboard navigation covers all nav items.
 - Content renders from `src/data/*` without inline duplication; new tokens live in `src/index.css` `@theme`.

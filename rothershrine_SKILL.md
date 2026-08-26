@@ -1,10 +1,10 @@
 ---
 name: rothershrine
 display_name: Blessed Stanley Rother Shrine — National Shrine, Oklahoma City
-version: 1.0.0
-last_updated: 2026-08-26
-project_state: static SPA — 0 tests, tsc + build green, singlefile deploy (pinned)
-stack: react 19.2.8 / vite 7.3.6 / tailwind 4.3.3 (@tailwindcss/vite 4.1.17) / typescript 5.9.3 / react-router 7.18.2 / singlefile 2.3.3
+version: 1.1.0
+last_updated: 2026-08-27
+project_state: static SPA — 26 tests (5 files), lint+typecheck+test+build green, singlefile deploy (pinned)
+stack: react 19.2.8 / vite 7.3.6 / tailwind 4.3.3 (@tailwindcss/vite 4.1.17) / typescript 5.9.3 / react-router 7.18.2 / singlefile 2.3.3 / eslint 9.23 flat / vitest 3.1 jsdom / testing-library 16
 rendering: static SPA (HashRouter, no SSR)
 data_layer: file-backed typed arrays in src/data/*
 deploy: vite-plugin-singlefile → dist/index.html + dist/images/ → GH Pages / S3 (publicDir copy — not inlined)
@@ -91,17 +91,21 @@ git clone <repo-url> rothershrine && cd rothershrine
 pnpm install --frozen-lockfile  # deterministic — versions pinned exact in package.json
 # or: npm ci
 pnpm dev                # → http://localhost:5173 (Vite HMR)
+pnpm lint               # → eslint flat — must be clean (--max-warnings 0)
+pnpm typecheck          # → tsc --noEmit — must be silent
+pnpm test               # → vitest jsdom — 26 tests (5 files)
 pnpm build              # → dist/index.html + dist/images/ (viteSingleFile inlines JS+CSS; publicDir copied)
 pnpm preview            # → http://localhost:4173 (preview dist)
-npx tsc --noEmit        # type gate — must be silent
 ```
 
 ### 3.2 Critical Config Files
 
 | File | Purpose | Gotcha |
 |---|---|---|
-| `vite.config.ts` | `plugins: [react(), tailwindcss(), viteSingleFile()]` + `resolve.alias["@"]` via `path.resolve(__dirname,"src")` | **Order matters.** `@` must stay in sync with `tsconfig.json` `paths`. |
-| `tsconfig.json` | `ES2020`/`ESNext`/`bundler`/`react-jsx`/`strict`/`noUnused*`/`isolatedModules`/`noEmit` + `include ["src","vite.config.ts"]` + `types ["node"]` | Adding a file outside `src/` requires expanding `include`. |
+| `vite.config.ts` | `plugins: [react(), tailwindcss(), viteSingleFile()]` + `resolve.alias["@"]` via `path.resolve(__dirname,"src")` + `test` (vitest jsdom, globals, setupFiles) | **Order matters.** `@` must stay in sync with `tsconfig.json` `paths`. Cast `test` via `as unknown as` to avoid vite 6/7 dual-install type clash. |
+| `tsconfig.json` | `ES2020`/`ESNext`/`bundler`/`react-jsx`/`strict`/`noUnused*`/`isolatedModules`/`noEmit` + `include ["src","vite.config.ts","eslint.config.js"]` + `types ["node","vitest/globals"]` | Adding a file outside `src/` requires expanding `include`. |
+| `eslint.config.js` | flat config (`@eslint/js` + `typescript-eslint 8` + `react-hooks 5` + `react-refresh` + `globals 16`) | `eslint . --max-warnings 0` — flat, no `.eslintrc`. |
+| `src/test/setup.ts` | vitest setup (`@testing-library/jest-dom` + IntersectionObserver mock) | jsdom lacks scrollTo/IntersectionObserver — mock there. |
 | `src/index.css` | `@import "tailwindcss"` + `@theme` (24 colors + 2 shadows) + `@layer base/utilities` | Only token source; no `tailwind.config.*` exists. |
 | `index.html` | `lang en`, `viewport`, `meta description`, preconnect `fonts.googleapis.com`, `Fraunces`+`Source Sans 3`, `#root` + `src/main.tsx` | Fonts belong here, not in JS. |
 | `.gitignore` | Ignores `node_modules/`, `.next/`, `dist/`, `skills/` + `nohup.out`, `.venv`, `bak.git/` | `skills` symlink must not be committed. |
@@ -200,7 +204,7 @@ index.html (#root) → src/main.tsx (StrictMode+createRoot)
 
 No global store, no API layer, no `server/` — add only with an ADR.
 
-### 5.2 Directory Inventory (31 files)
+### 5.2 Directory Inventory (37 files — 31 source + 6 test/setup)
 
 ```
 src/
@@ -230,7 +234,10 @@ src/
     content.ts            # 5 arrays + 7 interfaces (~260 lines)
     site.ts               # canonical address, maps URLs, contact emails — single source
   utils/
-    cn.ts                 # twMerge(clsx)
+    cn.ts                 # twMerge(clsx) + cn.test.ts (5 tests)
+  test/
+    setup.ts              # vitest setup (jest-dom + IntersectionObserver mock)
+  # adjacent tests: data/nav.test.ts (6), data/content.test.ts (5), data/site.test.ts (4), components/ui/Button.test.tsx (6) — 5 files / 26 tests + 1 setup
 ```
 
 ### 5.3 Client vs Server
@@ -431,24 +438,28 @@ pnpm build && pnpm preview  # :4173
 Run in order — every step must be green before pushing `main` (`main` is the deploy branch).
 
 ```bash
-npx tsc --noEmit               # 1 — type gate (no output = pass)
-pnpm build                     # 2 — singlefile build → dist/index.html (~381 kB, gzip ~110 kB; + dist/images/)
-pnpm preview &                 # 3 — smoke: spot-check 10 routes + 4 hash anchors
-ls -lh dist/                   # 4 — confirm dist/index.html + dist/images/ (publicDir copy expected)
-# 5 — axe/Lighthouse a11y spot-check on Header + Home hero + FAQ
-git push origin main           # 6 — deploy (GH Pages / S3 upload of dist/index.html + dist/images/)
+pnpm lint                      # 1 — eslint flat --max-warnings 0
+pnpm typecheck                 # 2 — tsc --noEmit (strict)
+pnpm test                      # 3 — vitest jsdom — 26 tests (5 files)
+pnpm build                     # 4 — singlefile build → dist/index.html (~381 kB, gzip ~110 kB; + dist/images/)
+pnpm preview &                 # 5 — smoke: spot-check 10 routes + 4 hash anchors
+ls -lh dist/                   # 6 — confirm dist/index.html + dist/images/ (publicDir copy expected)
+# 7 — axe/Lighthouse a11y spot-check on Header + Home hero + FAQ
+git push origin main           # 8 — deploy (GH Pages / S3 upload of dist/index.html + dist/images/)
 ```
 
 | Category | Check | How |
 |---|---|---|
-| Types | `npx tsc --noEmit` clean | `strict` + `noUnused*` pass |
+| Lint | `pnpm lint` clean | `eslint . --max-warnings 0` — flat config |
+| Types | `pnpm typecheck` (`npx tsc --noEmit`) clean | `strict` + `noUnused*` pass |
+| Tests | `pnpm test` — 26 passed (5 files) | `vitest` jsdom + setup `src/test/setup.ts` |
 | Build | `pnpm build` greens | `viteSingleFile` inlines JS + CSS; `dist/images/` copied from `public/` (not inlined) |
 | Routes | All 10 pages + 7 alias paths + 4 hash anchors navigate | Manual or `agent-browser` smoke |
 | A11y | Contrast ≥4.5:1 on body, `alt` on content images, `aria-expanded` on toggle | Spot-check per §8 table |
 | Visual | Hero gradients + `shadow-shrine` + `divider-weave` render | Preview comparison |
 | Git | No `dist/`/`node_modules/`/`skills/` committed | `.gitignore` respected |
 
-No test suite yet — when `vitest`/`playwright` are added, insert `pnpm test` and `pnpm test:e2e` between steps 1 and 2 and update this § + `README.md` + `AGENTS.md`.
+Playwright E2E (`pnpm add -D playwright @playwright/test` → `test:e2e`) remains future — add when journeys stabilize.
 
 ---
 
@@ -846,4 +857,4 @@ This project follows **ANALYZE → PLAN → VALIDATE → IMPLEMENT → VERIFY �
 | Images | `public/images/*.jpg` (local fallback) + Pexels CDN for hero/whatToSee (onError→local) → `dist/images/` |
 | Vite alias + singlefile | `vite.config.ts` |
 | TS strict + include | `tsconfig.json` (includes `src/data/site.ts` via `src`) |
-| Pre-ship gate | `npx tsc --noEmit && pnpm build` (~381kB/110kB + dist/images/) → `pnpm preview` |
+| Pre-ship gate | `pnpm lint && pnpm typecheck && pnpm test && pnpm build` (~381kB/110kB + dist/images/) → `pnpm preview` |

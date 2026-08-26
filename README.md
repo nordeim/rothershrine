@@ -40,6 +40,8 @@ Every row below is implemented — no placeholders.
 | Icons | lucide-react | `1.34.0` | Header/footer + page iconography |
 | Utils | clsx + tailwind-merge | `2.1.1` / `3.6.0` | `cn()` class merging |
 | Bundling | vite-plugin-singlefile | `2.3.3` | Inlines JS+CSS into `dist/index.html` (`public/images/` copied to `dist/images/`) |
+| Testing | Vitest + Testing Library + jsdom | `3.1.4` / `16.2.0` / `26.1.0` | `globals: true`, `environment: jsdom`, `setupFiles: src/test/setup.ts` |
+| Linting | ESLint flat + typescript-eslint + react-hooks | `9.23.0` / `8.28.0` / `5.2.0` | `eslint . --max-warnings 0`, `eslint.config.js` |
 | Fonts | Google Fonts | — | `Fraunces` (display) + `Source Sans 3` (body) via `index.html` |
 
 Versions pinned exact in `package.json` and match `pnpm-lock.yaml` (`--frozen-lockfile` in CI) + `package-lock.json`.
@@ -67,9 +69,10 @@ flowchart TB
 ```
 📂 rothershrine/
 ├── 📄 index.html            # lang, viewport, meta description, Google Fonts, #root
-├── 📄 vite.config.ts        # plugins [react, tailwindcss, viteSingleFile] + alias @→src
-├── 📄 tsconfig.json         # ES2020 / ESNext / bundler / strict / @/* paths
-├── 📄 package.json          # scripts: dev / build / preview
+├── 📄 eslint.config.js      # flat config (typescript-eslint 8 + react-hooks 5 + react-refresh)
+├── 📄 vite.config.ts        # plugins [react, tailwindcss, viteSingleFile] + alias @→src + vitest(jsdom)
+├── 📄 tsconfig.json         # ES2020 / ESNext / bundler / strict / @/* paths + vitest/globals
+├── 📄 package.json          # scripts: dev / build / preview / typecheck / lint / test / test:watch
 ├── 📂 public/
 │   └── 📂 images/           # hero-shrine.jpg + shepherd-emblem.jpg via /images/*.jpg (Vite publicDir → dist/images/); whatToSee cards use Pexels CDN URLs in content.ts (local is fallback)
 ├── 📂 src/
@@ -95,6 +98,9 @@ flowchart TB
 │   │   └── 📄 site.ts       # canonical address, maps URLs, contact emails — single source
 │   └── 📂 utils/
 │       └── 📄 cn.ts         # twMerge(clsx) — always merge via cn()
+│   └── 📂 test/
+│       └── 📄 setup.ts      # vitest setup (`@testing-library/jest-dom` + IntersectionObserver mock)
+│       (adjacent tests: `src/utils/cn.test.ts`, `src/data/{nav,content,site}.test.ts`, `src/components/ui/Button.test.tsx` — 5 files / 26 tests)
 ├── 📂 docs/
 │   └── 📄 prompts.md        # Intent lineage
 ├── 📄 CLAUDE.md             # Deep conventions (authoritative)
@@ -129,15 +135,19 @@ pnpm preview
 ### Verify Setup
 
 ```bash
-npx tsc --noEmit          # type gate — expect no output (clean)
-pnpm build                # expect: "✓ built in ~3s" + "Inlining: index-*.js / style-*.css"
-ls -lh dist/index.html    # expect: single HTML file, no separate assets chunk
+pnpm lint               # eslint flat — expect no output (clean)
+pnpm typecheck         # tsc --noEmit — expect no output (clean)
+pnpm test               # vitest jsdom — expect 26 passed
+pnpm build              # expect: "✓ built in ~3s" + "Inlining: index-*.js / style-*.css"
+ls -lh dist/index.html  # expect: single HTML file, no separate assets chunk
 ```
 
 | Check | Expected |
 |---|---|
 | `pnpm dev` | Vite ready on `:5173`, HMR active |
-| `npx tsc --noEmit` | Exit `0`, no errors |
+| `pnpm lint` | Exit `0`, no warnings (`--max-warnings 0`) |
+| `pnpm typecheck` | Exit `0`, no errors |
+| `pnpm test` | `5 test files — 26 passed` |
 | `pnpm build` | `dist/index.html` exists (~381 kB, gzip ~110 kB) + `dist/images/` |
 | `pnpm preview` | Prod preview on `:4173`, all alias routes + `#hash` anchors navigate |
 
@@ -193,7 +203,7 @@ This repo follows the six-phase workflow in `CLAUDE.md` (ANALYZE → PLAN → VA
 - **Commits:** Conventional Commits — `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, `style:` — atomic, subject ≤72 chars.
 - **Branches:** `feat/<slug>`, `fix/<slug>`, `docs/<slug>` — short-lived (1–3 days), squash-merge.
 - **Conventions:** `PascalCase.tsx` for components/pages, `camelCase.ts` for data/utils, `PrimaryNav` single-source, alias routes preserved, `cn()` for merges, `shrine-*` tokens only.
-- **Pre-push gate:** `npx tsc --noEmit && pnpm build` — both green.
+- **Pre-push gate:** `pnpm lint && pnpm typecheck && pnpm test && pnpm build` — all four green.
 
 > `skills/` is a symlink to `~/.pi/agent/skills` and is `.gitignore`d — don't commit it. See `AGENTS.md` for the compact cheat sheet.
 
