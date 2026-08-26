@@ -1,0 +1,39 @@
+import { HashRouter, Route, Routes } from "react-router-dom";
+import { Layout } from "./components/Layout";
+import Home from "./pages/Home";
+import AboutRother from "./pages/AboutRother";
+import History from "./pages/History";
+import WhatToSee from "./pages/WhatToSee";
+import Pilgrimage from "./pages/Pilgrimage";
+import NewsEvents from "./pages/NewsEvents";
+import Volunteer from "./pages/Volunteer";
+import Give from "./pages/Give";
+import FAQ from "./pages/FAQ";
+import NotFound from "./pages/NotFound";
+
+export default function App() {
+  return (
+    <HashRouter>
+      <Routes>
+        <Route element={<Layout />}>
+          <Route index element={<Home />} />
+          <Route path="about" element={<AboutRother />} />
+          <Route path="about-blessed-stanley-rother" element={<AboutRother />} />
+          <Route path="history" element={<History />} />
+          <Route path="what-to-see" element={<WhatToSee />} />
+          <Route path="grounds-art-architecture" element={<WhatToSee />} />
+          <Route path="pilgrimage" element={<Pilgrimage />} />
+          <Route path="visit-planning" element={<Pilgrimage />} />
+          <Route path="hours-location" element={<Pilgrimage />} />
+          <Route path="news-events" element={<NewsEvents />} />
+          <Route path="news-and-events" element={<NewsEvents />} />
+          <Route path="volunteer" element={<Volunteer />} />
+          <Route path="give" element={<Give />} />
+          <Route path="shrinegift" element={<Give />} />
+          <Route path="faq" element={<FAQ />} />
+          <Route path="*" element={<NotFound />} />
+        </Route>
+      </Routes>
+    </HashRouter>
+  );
+}

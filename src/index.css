@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Fraunces", "Georgia", serif;
+  --font-body: "Source Sans 3", "Segoe UI", sans-serif;
+
+  --color-shrine-cream: #faf5eb;
+  --color-shrine-parchment: #f2e9d8;
+  --color-shrine-stone: #ded0b4;
+  --color-shrine-ink: #2c2418;
+  --color-shrine-charcoal: #423a2c;
+
+  --color-shrine-maroon-50: #fbebea;
+  --color-shrine-maroon-100: #f0cdca;
+  --color-shrine-maroon-300: #b96257;
+  --color-shrine-maroon-500: #7c2a25;
+  --color-shrine-maroon-600: #691f1e;
+  --color-shrine-maroon-700: #55191a;
+  --color-shrine-maroon-900: #351012;
+
+  --color-shrine-gold-100: #f6e9c6;
+  --color-shrine-gold-300: #e2bf72;
+  --color-shrine-gold-500: #c3963f;
+  --color-shrine-gold-600: #a67930;
+
+  --color-shrine-pine-500: #33513f;
+  --color-shrine-pine-600: #26402f;
+  --color-shrine-pine-700: #1c3123;
+
+  --shadow-shrine: 0 20px 60px -20px rgba(53, 16, 18, 0.35);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: var(--font-body);
+    background-color: var(--color-shrine-cream);
+    color: var(--color-shrine-ink);
+  }
+
+  h1, h2, h3, h4, .font-display {
+    font-family: var(--font-display);
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .bg-adobe-texture {
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.06), transparent 40%),
+      radial-gradient(circle at 80% 60%, rgba(0, 0, 0, 0.08), transparent 45%);
+  }
+
+  .divider-weave {
+    background-image: repeating-linear-gradient(
+      45deg,
+      var(--color-shrine-gold-500) 0 6px,
+      var(--color-shrine-maroon-600) 6px 12px,
+      var(--color-shrine-pine-600) 12px 18px
+    );
+  }
+}
