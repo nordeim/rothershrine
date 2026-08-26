@@ -3,6 +3,7 @@ import { Container } from "@/components/ui/Container";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Reveal } from "@/components/ui/Reveal";
 import { Button } from "@/components/ui/Button";
+import { site } from "@/data/site";
 import { Clock3, MapPin, Users, Navigation } from "lucide-react";
 
 const hours = [
@@ -78,16 +79,16 @@ export function Pilgrimage() {
               <MapPin className="h-8 w-8 text-shrine-gold-300" aria-hidden="true" />
               <h3 className="mt-4 font-display text-2xl font-semibold">Find Us</h3>
               <p className="mt-3 text-shrine-cream/80">
-                13300 N Kelley Ave
+                {site.address.street}
                 <br />
-                Oklahoma City, OK 73131
+                {site.address.city}, {site.address.state} {site.address.zip}
               </p>
               <div className="mt-6 flex items-center gap-3 text-sm text-shrine-cream/70">
                 <Clock3 className="h-4 w-4 text-shrine-gold-300" aria-hidden="true" />
                 Free onsite parking, including accessible spaces near the main entrance.
               </div>
               <Button
-                href="https://www.google.com/maps/search/?api=1&query=13300+N+Kelley+Ave+Oklahoma+City+OK"
+                href={site.mapsUrl}
                 variant="outline-light"
                 className="mt-7 w-full"
                 icon={<Navigation className="h-4 w-4" aria-hidden="true" />}
@@ -125,7 +126,7 @@ export function Pilgrimage() {
           <Reveal delay={200} className="mt-12 flex justify-center">
             <div className="flex items-center gap-3 rounded-sm bg-shrine-cream px-6 py-4 text-sm text-shrine-charcoal shadow-shrine">
               <Users className="h-5 w-5 text-shrine-maroon-500" aria-hidden="true" />
-              Groups of 15+: email <a href="mailto:pilgrimage@rothershrine.org" className="font-semibold text-shrine-maroon-600 underline underline-offset-2">pilgrimage@rothershrine.org</a>
+              Groups of 15+: email <a href={`mailto:${site.contact.pilgrimageEmail}`} className="font-semibold text-shrine-maroon-600 underline underline-offset-2">{site.contact.pilgrimageEmail}</a>
             </div>
           </Reveal>
         </Container>

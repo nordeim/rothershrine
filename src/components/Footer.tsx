@@ -4,6 +4,7 @@ import { Container } from "@/components/ui/Container";
 import { Emblem } from "@/components/Emblem";
 import { FacebookIcon, InstagramIcon, YoutubeIcon } from "@/components/SocialIcons";
 import { footerNav } from "@/data/nav";
+import { site } from "@/data/site";
 
 const exploreLinks = footerNav.slice(0, 4);
 const involvedLinks = footerNav.slice(4, 7);
@@ -86,7 +87,7 @@ export function Footer() {
           <address className="mt-4 space-y-3 text-sm not-italic text-shrine-cream/75">
             <p className="flex items-start gap-2.5">
               <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-shrine-gold-300" aria-hidden="true" />
-              13300 N Kelley Ave, Oklahoma City, OK 73131
+              {site.address.full}
             </p>
             <p className="flex items-start gap-2.5">
               <Clock className="mt-0.5 h-4 w-4 shrink-0 text-shrine-gold-300" aria-hidden="true" />

@@ -3,6 +3,7 @@ import { Container } from "@/components/ui/Container";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Reveal } from "@/components/ui/Reveal";
 import { Button } from "@/components/ui/Button";
+import { site } from "@/data/site";
 import { BookOpen, HandHeart, Sprout } from "lucide-react";
 
 const roles = [
@@ -72,6 +73,13 @@ export function Volunteer() {
               alt="Volunteers distributing supplies and assisting visitors outdoors"
               className="h-80 w-full rounded-sm object-cover shadow-shrine sm:h-96"
               loading="lazy"
+                  onError={(event) => {
+                    const target = event.currentTarget as HTMLImageElement;
+                    if (!target.dataset.fallback) {
+                      target.dataset.fallback = "1";
+                      target.src = "/images/hero-shrine.jpg";
+                    }
+                  }}
             />
           </Reveal>
           <Reveal delay={100}>
@@ -81,7 +89,7 @@ export function Volunteer() {
               description="New volunteers attend a one-hour orientation covering the Shrine's story, safety guidelines, and their specific role. Background checks are required for roles working with minors."
             />
             <div className="mt-8">
-              <Button href="mailto:volunteer@rothershrine.org" variant="primary">
+              <Button href={`mailto:${site.contact.volunteerEmail}`} variant="primary">
                 Email the Volunteer Office
               </Button>
             </div>

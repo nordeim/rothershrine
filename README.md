@@ -71,21 +71,28 @@ flowchart TB
 ├── 📄 tsconfig.json         # ES2020 / ESNext / bundler / strict / @/* paths
 ├── 📄 package.json          # scripts: dev / build / preview
 ├── 📂 public/
-│   └── 📂 images/           # hero-shrine.jpg + shepherd-emblem.jpg via /images/*.jpg (Vite publicDir → dist/images/); whatToSee cards use Pexels CDN URLs in src/data/content.ts
+│   └── 📂 images/           # hero-shrine.jpg + shepherd-emblem.jpg via /images/*.jpg (Vite publicDir → dist/images/); whatToSee cards use Pexels CDN URLs in content.ts (local is fallback)
 ├── 📂 src/
 │   ├── 📄 App.tsx           # HashRouter + 15 routes (7 alias pairs + 3 hash anchors + *)
 │   ├── 📄 main.tsx          # StrictMode + createRoot
-│   ├── 📄 index.css         # @theme shrine-* tokens + @layer base/utilities
+│   ├── 📄 index.css         # @theme shrine-* tokens (22) + @layer base/utilities
 │   ├── 📂 components/
-│   │   ├── 📄 Layout.tsx    # Outlet + scroll/hash restoration
-│   │   ├── 📄 Header.tsx    # sticky, scrolled blur, hover dropdown, mobile drawer
-│   │   ├── 📄 Footer.tsx    # 4-col Explore / Get Involved / Visit Us
-│   │   ├── 📄 PageHero.tsx  # maroon hero primitive (image opacity + gradients)
-│   │   └── 📂 ui/           # Button (4 variants), Container, SectionHeading
-│   ├── 📂 pages/            # Home, AboutRother, History, WhatToSee, Pilgrimage, NewsEvents, Volunteer, Give, FAQ, NotFound
+│   │   ├── 📄 Layout.tsx    # Outlet + scroll/hash restoration + SkipLink
+│   │   ├── 📄 Header.tsx    # maroon-900 sticky, useScrolled, hover+click dropdown, mobile drawer
+│   │   ├── 📄 Footer.tsx    # 4-col + divider-weave-thin + SocialIcons + site.ts address
+│   │   ├── 📄 PageHero.tsx  # maroon hero primitive (compact? + bg-grain + gradients)
+│   │   ├── 📄 Emblem.tsx    # inline SVG emblem (crook + wheat)
+│   │   ├── 📄 SkipLink.tsx  # skip-to-main-content
+│   │   ├── 📄 SocialIcons.tsx # hand-drawn brand glyphs (lucide has no brand icons)
+│   │   ├── 📄 Timeline.tsx  # alternating rail + Reveal
+│   │   └── 📂 ui/           # Button (to/href/button + icon), Container, SectionHeading, Accordion, Reveal
+│   ├── 📂 hooks/
+│   │   └── 📄 useScrolled.ts # scrollY > threshold → scrolled boolean
+│   ├── 📂 pages/            # Home, AboutRother, History, WhatToSee, Pilgrimage, NewsEvents, Volunteer, Give, FAQ, NotFound (all named exports)
 │   ├── 📂 data/
-│   │   ├── 📄 nav.ts        # primaryNav / footerNav — single source for Header & Footer
-│   │   └── 📄 content.ts    # lifeTimeline, whatToSee, faqs, upcomingEvents, givingOptions
+│   │   ├── 📄 nav.ts        # primaryNav (with description) / footerNav
+│   │   ├── 📄 content.ts    # lifeTimeline, whatToSee, faqs, upcomingEvents (category), givingOptions (name+icon)
+│   │   └── 📄 site.ts       # canonical address, maps URLs, contact emails — single source
 │   └── 📂 utils/
 │       └── 📄 cn.ts         # twMerge(clsx) — always merge via cn()
 ├── 📂 docs/
@@ -140,21 +147,30 @@ Tokens live in `src/index.css` `@theme`. Extend there — never use arbitrary `b
 
 | Token | Hex | Usage |
 |---|---|---|
-| `shrine-cream` | `#faf5eb` | Page background |
-| `shrine-parchment` | `#f2e9d8` | Section bands, card fills |
-| `shrine-stone` | `#ded0b4` | Borders, dividers |
-| `shrine-ink` | `#2c2418` | Primary text |
+| `shrine-cream` | `#faf6ec` | Page background |
+| `shrine-parchment` | `#f2e9d6` | Section bands, card fills |
+| `shrine-parchment-dark` | `#e7d9b8` | Dark parchment variant |
+| `shrine-stone` | `#dccfae` | Borders, dividers |
+| `shrine-ink` | `#2a2115` | Primary text |
 | `shrine-charcoal` | `#423a2c` | Secondary text |
+| `shrine-maroon-50` | `#fbf0ee` | Ghost hover bg |
 | `shrine-maroon-500` | `#7c2a25` | Eyebrow, links |
-| `shrine-maroon-600` | `#691f1e` | Header icon, secondary button, footer tile |
+| `shrine-maroon-600` | `#691f1e` | Header icon, secondary button |
 | `shrine-maroon-700` | `#55191a` | Display heading |
-| `shrine-maroon-900` | `#351012` | Hero + footer background |
+| `shrine-maroon-800` | `#431315` | Mid-dark maroon |
+| `shrine-maroon-900` | `#33100f` | Hero + footer background |
+| `shrine-maroon-950` | `#200a0a` | Deepest maroon (header top strip) |
 | `shrine-gold-300` | `#e2bf72` | Eyebrow on dark, header accent |
+| `shrine-gold-400` | `#d1a955` | Gold mid |
 | `shrine-gold-500` | `#c3963f` | Primary button |
+| `shrine-gold-600` | `#a67a2e` | Gold hover |
+| `shrine-pine-500` | `#335840` | Pine accent |
 | `shrine-pine-600` | `#26402f` | Accent / weave |
-| `shadow-shrine` | `0 20px 60px -20px rgba(53,16,18,.35)` | Hero, cards, emblem |
+| `shrine-terracotta-500` | `#ab5f3c` | Community badge |
+| `shadow-shrine` | `0 20px 60px -20px rgba(51,16,15,.45)` | Hero, cards, emblem |
+| `shadow-shrine-lg` | `0 40px 90px -30px rgba(51,16,15,.55)` | Elevated cards, header dropdown |
 
-**Typography:** `Fraunces` (display, quote, `font-display` / `h1–h4`) + `Source Sans 3` (body) — loaded in `index.html`, set in `@theme` + `@layer base`. Utilities: `text-balance`, `bg-adobe-texture`, `divider-weave`.
+**Typography:** `Fraunces` (display, quote, `font-display` / `h1–h4`) + `Source Sans 3` (body, `font-sans` / `font-body` alias) — loaded in `index.html`, set in `@theme` + `@layer base`. Utilities: `text-balance`, `bg-adobe-texture`, `bg-grain`, `divider-weave` / `divider-weave-thin`, `reveal` / `reveal-visible`, `skip-link`, `mask-fade-b`.
 
 ## Deployment
 

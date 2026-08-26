@@ -19,7 +19,19 @@ export function PageHero({ eyebrow, title, description, image, children, compact
         compact ? "py-24 sm:py-28" : "py-28 sm:py-36",
       )}
     >
-      <img src={image} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover opacity-25" />
+      <img
+        src={image}
+        alt=""
+        aria-hidden="true"
+        className="absolute inset-0 h-full w-full object-cover opacity-25"
+        onError={(event) => {
+          const target = event.currentTarget as HTMLImageElement;
+          if (!target.dataset.fallback) {
+            target.dataset.fallback = "1";
+            target.src = "/images/hero-shrine.jpg";
+          }
+        }}
+      />
       <div className="absolute inset-0 bg-gradient-to-b from-shrine-maroon-900/70 via-shrine-maroon-900/85 to-shrine-maroon-900" />
       <div className="absolute inset-0 bg-gradient-to-r from-shrine-maroon-950/60 via-transparent to-shrine-maroon-950/40" />
       <div className="bg-adobe-texture bg-grain absolute inset-0" />

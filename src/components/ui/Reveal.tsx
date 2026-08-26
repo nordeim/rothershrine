@@ -14,15 +14,17 @@ interface RevealProps {
  * (older browsers) so content is never permanently hidden.
  */
 export function Reveal({ children, className, delay = 0, as = "div" }: RevealProps) {
-  const nodeRef = useRef<HTMLElement | null>(null);
+  const [node, setNode] = useState<HTMLElement | null>(null);
   const [visible, setVisible] = useState(false);
 
-  const setNode = (node: HTMLElement | null) => {
-    nodeRef.current = node;
+  // Keep a ref for the callback so React doesn't warn about state during render
+  const nodeRef = useRef<HTMLElement | null>(null);
+  const assignNode = (el: HTMLElement | null) => {
+    nodeRef.current = el;
+    setNode(el);
   };
 
   useEffect(() => {
-    const node = nodeRef.current;
     if (!node) return;
     if (typeof IntersectionObserver === "undefined") {
       setVisible(true);
@@ -41,7 +43,7 @@ export function Reveal({ children, className, delay = 0, as = "div" }: RevealPro
     );
     observer.observe(node);
     return () => observer.disconnect();
-  }, []);
+  }, [node]);
 
   const sharedProps = {
     className: cn("reveal", visible && "reveal-visible", className),
@@ -50,14 +52,14 @@ export function Reveal({ children, className, delay = 0, as = "div" }: RevealPro
 
   if (as === "li") {
     return (
-      <li ref={setNode} {...sharedProps}>
+      <li ref={assignNode} {...sharedProps}>
         {children}
       </li>
     );
   }
 
   return (
-    <div ref={setNode} {...sharedProps}>
+    <div ref={assignNode} {...sharedProps}>
       {children}
     </div>
   );

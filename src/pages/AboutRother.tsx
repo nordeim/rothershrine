@@ -33,6 +33,13 @@ export function AboutRother() {
                 alt="Aerial view of a lakeside town nestled among the highlands near Lake Atitlán, Guatemala"
                 className="h-64 w-full object-cover"
                 loading="lazy"
+                  onError={(event) => {
+                    const target = event.currentTarget as HTMLImageElement;
+                    if (!target.dataset.fallback) {
+                      target.dataset.fallback = "1";
+                      target.src = "/images/hero-shrine.jpg";
+                    }
+                  }}
               />
             </div>
           </Reveal>
@@ -56,6 +63,13 @@ export function AboutRother() {
               alt="Scenic view of Cerro de Oro rising above Lake Atitlán, Guatemala"
               className="h-80 w-full rounded-sm object-cover shadow-shrine-lg sm:h-96"
               loading="lazy"
+                  onError={(event) => {
+                    const target = event.currentTarget as HTMLImageElement;
+                    if (!target.dataset.fallback) {
+                      target.dataset.fallback = "1";
+                      target.src = "/images/hero-shrine.jpg";
+                    }
+                  }}
             />
           </Reveal>
           <Reveal delay={100}>

@@ -118,33 +118,41 @@ npx tsc --noEmit        # type gate — must be silent
 
 ```css
 @theme {
-  --font-display: "Fraunces", "Georgia", serif;
-  --font-body: "Source Sans 3", "Segoe UI", sans-serif;
+  --font-display: "Fraunces", "Iowan Old Style", serif;
+  --font-sans: "Source Sans 3", system-ui, sans-serif;
+  --font-body: var(--font-sans); /* alias */
 
-  --color-shrine-cream: #faf5eb;
-  --color-shrine-parchment: #f2e9d8;
-  --color-shrine-stone: #ded0b4;
-  --color-shrine-ink: #2c2418;
+  --color-shrine-cream: #faf6ec;
+  --color-shrine-parchment: #f2e9d6;
+  --color-shrine-parchment-dark: #e7d9b8;
+  --color-shrine-stone: #dccfae;
+  --color-shrine-ink: #2a2115;
   --color-shrine-charcoal: #423a2c;
 
-  --color-shrine-maroon-50: #fbebea;
-  --color-shrine-maroon-100: #f0cdca;
-  --color-shrine-maroon-300: #b96257;
+  --color-shrine-maroon-50: #fbf0ee;
+  --color-shrine-maroon-100: #f3d9d4;
   --color-shrine-maroon-500: #7c2a25;
   --color-shrine-maroon-600: #691f1e;
   --color-shrine-maroon-700: #55191a;
-  --color-shrine-maroon-900: #351012;
+  --color-shrine-maroon-800: #431315;
+  --color-shrine-maroon-900: #33100f;
+  --color-shrine-maroon-950: #200a0a;
 
-  --color-shrine-gold-100: #f6e9c6;
+  --color-shrine-gold-100: #f8ecd2;
   --color-shrine-gold-300: #e2bf72;
+  --color-shrine-gold-400: #d1a955;
   --color-shrine-gold-500: #c3963f;
-  --color-shrine-gold-600: #a67930;
+  --color-shrine-gold-600: #a67a2e;
 
-  --color-shrine-pine-500: #33513f;
+  --color-shrine-pine-500: #335840;
   --color-shrine-pine-600: #26402f;
   --color-shrine-pine-700: #1c3123;
 
-  --shadow-shrine: 0 20px 60px -20px rgba(53, 16, 18, 0.35);
+  --color-shrine-terracotta-400: #c17a53;
+  --color-shrine-terracotta-500: #ab5f3c;
+
+  --shadow-shrine: 0 20px 60px -20px rgba(51, 16, 15, 0.45);
+  --shadow-shrine-lg: 0 40px 90px -30px rgba(51, 16, 15, 0.55);
 }
 ```
 
@@ -152,8 +160,8 @@ npx tsc --noEmit        # type gate — must be silent
 
 | Role | Font | Weights | Tracking | Class / Usage |
 |---|---|---|---|---|
-| Display / Quote | `Fraunces` | 400/500/600/700 + italic 500 | `tracking-tight` / `[0.25em]` on eyebrow | `font-display`, `h1–h4` (`@layer base`), hero title |
-| Body | `Source Sans 3` | 400/500/600/700 | `tracking-wide` / `[0.3em]` on eyebrow | `font-body` on `body`, all `p`/`li` |
+| Display / Quote | `Fraunces` | 400/500/600/700/800 + italic 500/600 | `tracking-tight` / `[0.25–0.35em]` on eyebrow | `font-display`, `h1–h4` (`@layer base`), hero title |
+| Body | `Source Sans 3` | 400/500/600/700 | `tracking-wide` / `[0.3em]` on eyebrow | `font-sans` (alias `font-body`) on `body`, all `p`/`li` |
 | Eyebrow (light) | — | 600 | `[0.25–0.35em]` | `text-shrine-gold-300 text-xs uppercase` |
 | Eyebrow (dark) | — | 600 | `[0.25em]` | `text-shrine-maroon-500` |
 
@@ -163,13 +171,18 @@ npx tsc --noEmit        # type gate — must be silent
 |---|---|---|
 | `.text-balance` | `text-wrap: balance` | Hero + heading line-wrap |
 | `.bg-adobe-texture` | double radial gradient (white 0.06 + black 0.08) | Subtle adobe wash on dark bands |
+| `.bg-grain` | `data:image/svg+xml` turbulence (`opacity 0.035`) | Grain overlay for hero/dark bands |
 | `.divider-weave` | `repeating-linear-gradient(45deg, gold-500 0 6px, maroon-600 6 12px, pine-600 12 18px)` | `Footer` 6px weave strip + pilgrim bands |
+| `.divider-weave-thin` | `repeating-linear-gradient(90deg, gold 0 10px, maroon 10 20, pine 20 30)` height 4px | Thin weave (hero bottom, footer top) |
+| `.mask-fade-b` | `linear-gradient(to bottom, black 70%, transparent)` | Mask for image fades |
+| `.reveal` / `.reveal-visible` | `translateY(24px)→0`, `opacity 0→1`, `0.7s ease` + `prefers-reduced-motion` kill | Scroll-reveal via `Reveal.tsx` + `IntersectionObserver` |
+| `.skip-link` | `fixed z-[100] -translate-y-24 → focus:translate-y-0` | Skip-to-content link |
 
 ### 4.4 Shadows & Radii
 
-- Only shadow is `shadow-shrine`. Radii are `rounded-sm` (buttons/cards) and `rounded-full` (emblem icon). Don't introduce `shadow-lg`/`rounded-xl` without a rationale.
+- Shadows: `shadow-shrine` (default) + `shadow-shrine-lg` (elevated cards/dropdowns). Radii are `rounded-sm` (buttons/cards) and `rounded-full` (emblem icon). Don't introduce `shadow-lg`/`rounded-xl` without a rationale.
 
-**Verification:** `grep --color shrine- src/index.css` → 19 tokens; copy-paste `@theme` into this doc to prevent drift.
+**Verification:** `grep --color shrine- src/index.css` → 22 tokens + 2 shadows; copy-paste `@theme` into this doc to prevent drift.
 
 ---
 
@@ -187,26 +200,35 @@ index.html (#root) → src/main.tsx (StrictMode+createRoot)
 
 No global store, no API layer, no `server/` — add only with an ADR.
 
-### 5.2 Directory Inventory (23 files)
+### 5.2 Directory Inventory (30 files)
 
 ```
 src/
   App.tsx                 # HashRouter + 15 routes (7 alias pairs + 3 hash anchors + *)
   main.tsx                # StrictMode + createRoot
-  index.css               # @theme + base + utilities
+  index.css               # @theme (22 tokens) + base + utilities (10)
   components/
-    Layout.tsx            # Outlet + hash-aware scroll restoration (setTimeout 80ms)
-    Header.tsx            # z-50 sticky, scrolled blur, hover dropdown, mobile drawer
-    Footer.tsx            # 4-col + divider-weave + social + contact
-    PageHero.tsx          # maroon-900 hero (image opacity-25 + gradients)
+    Layout.tsx            # Outlet + hash-aware scroll restoration + SkipLink
+    Header.tsx            # z-50 maroon-900 sticky, useScrolled, hover+click dropdown, mobile drawer
+    Footer.tsx            # 4-col + divider-weave-thin + SocialIcons + site.ts address
+    PageHero.tsx          # maroon-900 hero (compact?, bg-grain, dual gradients, divider-weave-thin)
+    Emblem.tsx            # inline SVG emblem (crook + wheat, currentColor)
+    SkipLink.tsx          # skip-to-#main-content link
+    SocialIcons.tsx       # hand-drawn Facebook/Instagram/YouTube glyphs
+    Timeline.tsx          # alternating rail + Reveal per entry
     ui/
-      Button.tsx          # anchor-based, 4 variants via variantClasses + cn()
+      Button.tsx          # discriminated union (to/href/button) + icon, 4 variants
       Container.tsx       # max-w-7xl mx-auto px-5 sm:px-8
-      SectionHeading.tsx  # eyebrow? / title / description + align/light
-  pages/                  # Home, AboutRother, History, WhatToSee, Pilgrimage, NewsEvents, Volunteer, Give, FAQ, NotFound
+      SectionHeading.tsx  # eyebrow? / title / description + align/light + line
+      Accordion.tsx       # FAQ accordion (aria-expanded, grid-rows animation)
+      Reveal.tsx          # IntersectionObserver fade+slide (fallback visible)
+  hooks/
+    useScrolled.ts        # scrollY > threshold boolean
+  pages/                  # Home, AboutRother, History, WhatToSee, Pilgrimage, NewsEvents, Volunteer, Give, FAQ, NotFound (named exports)
   data/
-    nav.ts                # primaryNav (6) / footerNav (10)
-    content.ts            # 5 arrays + 5 interfaces (~230 lines)
+    nav.ts                # primaryNav (6, with description) / footerNav (10)
+    content.ts            # 5 arrays + 7 interfaces (~260 lines)
+    site.ts               # canonical address, maps URLs, contact emails — single source
   utils/
     cn.ts                 # twMerge(clsx)
 ```
@@ -242,20 +264,23 @@ src/
 
 | Primitive | File | API | Rule |
 |---|---|---|---|
-| `Button` | `src/components/ui/Button.tsx` | `to?: string, href?: string, variant?: "primary"│"secondary"│"ghost"│"outline-light", className?` | Anchor-only; `to`→`<Link>`, else `<a>`; styles via `variantClasses` record + `cn()` |
+| `Button` | `src/components/ui/Button.tsx` | discriminated `to` (Link) / `href` (a) / native `button` + `variant`, `icon?`, `className?` | `to`→`<Link>`, `href`→`<a>`, else `<button>`; `variantClasses` + `cn()` + focus ring |
 | `Container` | `src/components/ui/Container.tsx` | `children, className?` | All sections wrap in `<Container>` |
-| `SectionHeading` | `src/components/ui/SectionHeading.tsx` | `eyebrow?, title, description?, align?, light?` | Light = gold/cream on dark |
-| `PageHero` | `src/components/PageHero.tsx` | `eyebrow, title, description?, image, children?` | Image `opacity-25` + double gradient; decorative `alt=""` |
-| `Header` | `src/components/Header.tsx` | `scrolled` (`scrollY>12`), `mobileOpen`, `openDesktopMenu` | `aria-expanded` on toggle; close on `location.pathname` change |
+| `SectionHeading` | `src/components/ui/SectionHeading.tsx` | `eyebrow?, title, description?, align?, light?` | Eyebrow renders line + gold/maroon; light = gold/cream on dark |
+| `PageHero` | `src/components/PageHero.tsx` | `eyebrow, title, description?, image, children?, compact?` | `compact` shrinks padding; `bg-grain` + dual gradients; `alt=""` |
+| `Header` | `src/components/Header.tsx` | `useScrolled()` + `mobileOpen`, `openDesktopMenu` | `aria-haspopup`/`aria-expanded` on dropdown trigger; close on `location.pathname` change |
+| `Reveal` | `src/components/ui/Reveal.tsx` | `children, delay?, as?: "div"│"li", className?` | `IntersectionObserver` 0.15 threshold; falls back visible if unsupported |
+| `Accordion` | `src/components/ui/Accordion.tsx` | `items: {question,answer}[]` | Single-open, `grid-rows` animation, `Plus rotate-45` |
+| `Emblem` / `SkipLink` / `Timeline` | `src/components/*` | see files | `Emblem` is inline SVG; `SkipLink` targets `#main-content`; `Timeline` alternating rail |
 | `cn` | `src/utils/cn.ts` | `cn(...ClassValue[])` | Only merge path — `twMerge(clsx(...))` |
 
 ---
 
 ## 6. Custom Hooks Deep Dive
 
-**Status: No custom hooks — intentional.**
+**Status: One hook — `useScrolled`.**
 
-This SPA has no `src/hooks/` and no `use*` hooks beyond React primitives in `Header`/`Layout`. Cross-component state is lifted only when needed; add a hook only when 2+ consumers share logic.
+Extracted from `Header.tsx` into `src/hooks/useScrolled.ts` so `Header` stays declarative. Before the elevation there were zero hooks; this is the first `src/hooks/` file.
 
 **When you add one:**
 
@@ -606,26 +631,32 @@ Every hex matches `src/index.css` `@theme` byte-for-byte. **Fail the build if it
 
 | Token | Hex | RGB | Tailwind Class | Usage |
 |---|---|---|---|---|
-| `shrine-cream` | `#faf5eb` | `250,245,235` | `bg-shrine-cream` | Page bg, card on dark |
-| `shrine-parchment` | `#f2e9d8` | `242,233,216` | `bg-shrine-parchment` | Section bands |
-| `shrine-stone` | `#ded0b4` | `222,208,180` | `border-shrine-stone` | Borders/dividers |
-| `shrine-ink` | `#2c2418` | `44,36,24` | `text-shrine-ink` | Primary text |
+| `shrine-cream` | `#faf6ec` | `250,246,236` | `bg-shrine-cream` | Page bg, card on dark |
+| `shrine-parchment` | `#f2e9d6` | `242,233,214` | `bg-shrine-parchment` | Section bands |
+| `shrine-parchment-dark` | `#e7d9b8` | `231,217,184` | `bg-shrine-parchment-dark` | Dark parchment variant |
+| `shrine-stone` | `#dccfae` | `220,207,174` | `border-shrine-stone` | Borders/dividers |
+| `shrine-ink` | `#2a2115` | `42,33,21` | `text-shrine-ink` | Primary text |
 | `shrine-charcoal` | `#423a2c` | `66,58,44` | `text-shrine-charcoal` | Secondary text / 70% |
-| `shrine-maroon-50` | `#fbebea` | `251,235,234` | `bg-shrine-maroon-50` | Ghost hover bg |
-| `shrine-maroon-100` | `#f0cdca` | `240,205,202` | — | Light tint |
-| `shrine-maroon-300` | `#b96257` | `185,98,87` | — | Mid |
+| `shrine-maroon-50` | `#fbf0ee` | `251,240,238` | `bg-shrine-maroon-50` | Ghost hover bg |
+| `shrine-maroon-100` | `#f3d9d4` | `243,217,212` | — | Light tint |
 | `shrine-maroon-500` | `#7c2a25` | `124,42,37` | `text-shrine-maroon-500` | Eyebrow on light |
-| `shrine-maroon-600` | `#691f1e` | `105,31,30` | `bg-shrine-maroon-600` | Desktop header icon, secondary btn |
+| `shrine-maroon-600` | `#691f1e` | `105,31,30` | `bg-shrine-maroon-600` | Secondary btn, timeline badge |
 | `shrine-maroon-700` | `#55191a` | `85,25,26` | `text-shrine-maroon-700` | Display heading |
-| `shrine-maroon-900` | `#351012` | `53,16,18` | `bg-shrine-maroon-900` | Hero + footer bg |
-| `shrine-gold-100` | `#f6e9c6` | `246,233,198` | — | Light gold |
+| `shrine-maroon-800` | `#431315` | `67,19,21` | — | Mid-dark maroon |
+| `shrine-maroon-900` | `#33100f` | `51,16,15` | `bg-shrine-maroon-900` | Hero + footer bg |
+| `shrine-maroon-950` | `#200a0a` | `32,10,10` | `bg-shrine-maroon-950` | Deepest maroon (header top strip) |
+| `shrine-gold-100` | `#f8ecd2` | `248,236,210` | — | Light gold |
 | `shrine-gold-300` | `#e2bf72` | `226,191,114` | `text-shrine-gold-300` | Eyebrow on dark, icon tint |
+| `shrine-gold-400` | `#d1a955` | `209,169,85` | — | Gold mid |
 | `shrine-gold-500` | `#c3963f` | `195,150,63` | `bg-shrine-gold-500` | Primary CTA |
-| `shrine-gold-600` | `#a67930` | `166,121,48` | — | Gold hover |
-| `shrine-pine-500` | `#33513f` | `51,81,63` | `text-shrine-pine-500` | Accent text |
+| `shrine-gold-600` | `#a67a2e` | `166,122,46` | — | Gold hover |
+| `shrine-pine-500` | `#335840` | `51,88,64` | `text-shrine-pine-500` | Pine accent |
 | `shrine-pine-600` | `#26402f` | `38,64,47` | `bg-shrine-pine-600` | Weave third band |
 | `shrine-pine-700` | `#1c3123` | `28,49,35` | `bg-shrine-pine-700` | Deep pine |
-| `shadow-shrine` | `rgba(53,16,18,0.35)` | — | `shadow-shrine` | `0 20px 60px -20px` |
+| `shrine-terracotta-400` | `#c17a53` | `193,122,83` | — | Terracotta mid |
+| `shrine-terracotta-500` | `#ab5f3c` | `171,95,60` | `bg-shrine-terracotta-500` | Community badge |
+| `shadow-shrine` | `rgba(51,16,15,0.45)` | — | `shadow-shrine` | `0 20px 60px -20px` |
+| `shadow-shrine-lg` | `rgba(51,16,15,0.55)` | — | `shadow-shrine-lg` | `0 40px 90px -30px` |
 
 **Forbidden:** `amber-*`, `slate-*`, `zinc-*`, `gray-*` generics (except Tailwind neutrals in tooling). Only exception: tooling grays in `node_modules`.
 
@@ -662,16 +693,18 @@ export interface FaqItem {
 // faqs: FaqItem[] — 6
 
 export interface EventItem {
-  date: string;            // "July 28" | "First Saturday, monthly" | "Ongoing"
+  date: string;            // "July 28" | "First Saturday, monthly" | "September – November" | "Quarterly…"
   title: string;
   location: string;
   description: string;
+  category: "Feast" | "Pilgrimage" | "Formation" | "Community";
 }
 // upcomingEvents: EventItem[] — 4
 
 export interface GivingOption {
-  title: string;
+  name: string;            // was `title` — renamed in elevated palette
   description: string;
+  icon: "flame" | "church" | "sprout" | "heart" | "book" | "hand-heart" | "landmark" | "globe";
 }
 // givingOptions: GivingOption[] — 8
 ```
@@ -686,10 +719,19 @@ export interface NavLink {
 export interface NavItem {
   label: string;
   to: string;
-  children?: NavLink[];    // hover dropdown + mobile drill-down source
+  description?: string;
+  children?: (NavLink & { description?: string })[]; // hover dropdown + mobile drill-down source
 }
-// primaryNav: NavItem[] — 6 (3 with children)
+// primaryNav: NavItem[] — 6 (2 with children, with descriptions)
 // footerNav: NavLink[] — 10
+
+export const site: {
+  name: string; shortName: string;
+  address: { street: string; city: string; state: string; zip: string; full: string; query: string; };
+  hours: { grounds: string; shrineChurch: string; chapelOfTomb: string; giftShop: string; };
+  contact: { email: string; pilgrimageEmail: string; volunteerEmail: string; };
+  mapsUrl: string; mapsEmbedSrc: string;
+} // src/data/site.ts — single source for address/contact
 ```
 
 ### 20.3 UI Primitive Props
@@ -697,13 +739,11 @@ export interface NavItem {
 ```ts
 // src/components/ui/Button.tsx
 type Variant = "primary" | "secondary" | "ghost" | "outline-light";
-interface ButtonProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
-  to?: string;             // internal → <Link>
-  href?: string;           // external → <a>
-  variant?: Variant;
-  children: React.ReactNode;
-  className?: string;
-}
+type ButtonProps =
+  | ({ to: string } & React.AnchorHTMLAttributes<HTMLAnchorElement> & { variant?: Variant; icon?: React.ReactNode })
+  | ({ href: string } & React.AnchorHTMLAttributes<HTMLAnchorElement> & { variant?: Variant; icon?: React.ReactNode })
+  | (React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant; icon?: React.ReactNode });
+// discriminated: `to` → <Link>, `href` → <a>, else <button>; all carry `className?` via rest
 
 // src/components/ui/Container.tsx
 interface ContainerProps { children: React.ReactNode; className?: string; }
@@ -723,8 +763,9 @@ interface PageHeroProps {
   eyebrow: string;
   title: string;
   description?: string;
-  image: string;           // hero image src
+  image: string;           // hero image src (Pexels CDN, fallback /images/hero-shrine.jpg)
   children?: React.ReactNode;
+  compact?: boolean;       // tighter vertical padding
 }
 ```
 
@@ -795,13 +836,14 @@ This project follows **ANALYZE → PLAN → VALIDATE → IMPLEMENT → VERIFY �
 | 60-sec agent cheat sheet | `AGENTS.md` |
 | Deep workflow + anti-generic | `CLAUDE.md` |
 | Intent lineage | `docs/prompts.md` |
-| Tokens (19) + utilities | `src/index.css` |
-| Route table + aliases | `src/App.tsx` |
-| Nav single-source | `src/data/nav.ts` |
-| Content arrays (5) | `src/data/content.ts` |
-| Primitive: Button/Container/SectionHeading | `src/components/ui/*.tsx` |
+| Tokens (22) + utilities (10) | `src/index.css` (`--font-sans` alias `--font-body`) |
+| Route table + aliases | `src/App.tsx` (named exports) |
+| Nav single-source | `src/data/nav.ts` (with `description`) |
+| Content arrays (5) + site | `src/data/content.ts` (`category`, `icon`) + `src/data/site.ts` |
+| Primitives | `src/components/ui/*` (Button/Container/SectionHeading/Accordion/Reveal) + Emblem/SkipLink/Timeline |
+| Hooks | `src/hooks/useScrolled.ts` |
 | Merge helper | `src/utils/cn.ts` |
-| Images | `public/images/*.jpg` (hero/emblem via `/images/` → `dist/images/`) + Pexels CDN for whatToSee cards |
+| Images | `public/images/*.jpg` (local fallback) + Pexels CDN for hero/whatToSee (onError→local) → `dist/images/` |
 | Vite alias + singlefile | `vite.config.ts` |
-| TS strict + include | `tsconfig.json` |
-| Pre-ship gate | `npx tsc --noEmit && pnpm build` (370kB/108kB + dist/images/) → `pnpm preview` |
+| TS strict + include | `tsconfig.json` (includes `src/data/site.ts` via `src`) |
+| Pre-ship gate | `npx tsc --noEmit && pnpm build` (~380kB/110kB + dist/images/) → `pnpm preview` |

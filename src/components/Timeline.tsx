@@ -25,10 +25,11 @@ export function Timeline({ entries }: TimelineProps) {
                 )}
               >
                 <span
+                  title={entry.year}
                   className="absolute left-0 top-1 flex h-14 w-14 items-center justify-center rounded-full border-4 border-shrine-cream bg-shrine-maroon-600 text-center font-display text-[11px] font-semibold leading-none text-shrine-gold-300 shadow-shrine lg:left-1/2 lg:-translate-x-1/2"
                   aria-hidden="true"
                 >
-                  {entry.year.slice(0, 4)}
+                  {entry.year.includes("–") ? entry.year.split("–")[0] : entry.year.slice(0, 4)}
                 </span>
 
                 <div className={cn("rounded-sm border border-shrine-stone bg-shrine-cream p-6 sm:p-7", isEven ? "lg:text-right" : "")}>

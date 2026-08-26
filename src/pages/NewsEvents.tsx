@@ -2,11 +2,11 @@ import { PageHero } from "@/components/PageHero";
 import { Container } from "@/components/ui/Container";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Reveal } from "@/components/ui/Reveal";
-import { upcomingEvents } from "@/data/content";
+import { upcomingEvents, type EventItem } from "@/data/content";
 import { CalendarDays, MapPin } from "lucide-react";
 import { cn } from "@/utils/cn";
 
-const categoryStyles: Record<string, string> = {
+const categoryStyles: Record<EventItem["category"], string> = {
   Feast: "bg-shrine-gold-500 text-shrine-maroon-900",
   Pilgrimage: "bg-shrine-pine-600 text-shrine-cream",
   Formation: "bg-shrine-maroon-600 text-shrine-cream",

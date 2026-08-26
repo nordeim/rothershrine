@@ -42,6 +42,13 @@ export function WhatToSee() {
                     alt={section.imageAlt}
                     className="h-72 w-full object-cover sm:h-96"
                     loading="lazy"
+                    onError={(event) => {
+                      const target = event.currentTarget as HTMLImageElement;
+                      if (!target.dataset.fallback) {
+                        target.dataset.fallback = "1";
+                        target.src = "/images/hero-shrine.jpg";
+                      }
+                    }}
                   />
                 </div>
               </Reveal>

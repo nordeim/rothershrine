@@ -22,6 +22,13 @@ export function Home() {
           alt=""
           aria-hidden="true"
           className="absolute inset-0 h-full w-full object-cover opacity-30"
+          onError={(event) => {
+            const target = event.currentTarget as HTMLImageElement;
+            if (!target.dataset.fallback) {
+              target.dataset.fallback = "1";
+              target.src = "/images/hero-shrine.jpg";
+            }
+          }}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-shrine-maroon-950/60 via-shrine-maroon-900/85 to-shrine-maroon-900" />
         <div className="bg-adobe-texture bg-grain absolute inset-0" />
@@ -104,6 +111,13 @@ export function Home() {
                   alt="Storm clouds over Lake Atitlán at sunset, near Santiago Atitlán, Guatemala"
                   className="h-[26rem] w-full object-cover sm:h-[30rem]"
                   loading="lazy"
+                  onError={(event) => {
+                    const target = event.currentTarget as HTMLImageElement;
+                    if (!target.dataset.fallback) {
+                      target.dataset.fallback = "1";
+                      target.src = "/images/hero-shrine.jpg";
+                    }
+                  }}
                 />
               </div>
               <div className="absolute -bottom-6 -left-6 hidden w-52 rounded-sm border border-shrine-stone bg-shrine-cream p-5 shadow-shrine sm:block">
@@ -138,6 +152,13 @@ export function Home() {
                       alt={section.imageAlt}
                       className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                       loading="lazy"
+                      onError={(event) => {
+                        const target = event.currentTarget as HTMLImageElement;
+                        if (!target.dataset.fallback) {
+                          target.dataset.fallback = "1";
+                          target.src = "/images/hero-shrine.jpg";
+                        }
+                      }}
                     />
                     <span className="absolute left-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-shrine-maroon-900/80 font-display text-sm font-semibold text-shrine-gold-300">
                       0{index + 1}

@@ -27,12 +27,13 @@ All commands verified in `package.json` `scripts`. Don't document a script until
 src/
   App.tsx              # HashRouter + alias routes (see below)
   main.tsx             # StrictMode + createRoot
-  index.css            # @theme tokens + @layer base/utilities
-  components/          # Layout, Header, Footer, PageHero, ui/{Button,Container,SectionHeading}
-  pages/               # Home, AboutRother, History, WhatToSee, Pilgrimage, NewsEvents, Volunteer, Give, FAQ, NotFound
-  data/                # nav.ts (primaryNav/footerNav — single source), content.ts (typed content arrays)
+  index.css            # @theme tokens (22) + @layer base/utilities (10)
+  components/          # Layout (+SkipLink), Header (useScrolled), Footer, PageHero, Emblem, Timeline, SocialIcons, ui/{Button,Container,SectionHeading,Accordion,Reveal}
+  hooks/               # useScrolled.ts
+  pages/               # Home, AboutRother, History, WhatToSee, Pilgrimage, NewsEvents, Volunteer, Give, FAQ, NotFound (named exports)
+  data/                # nav.ts (with description), content.ts (category+icon), site.ts (canonical address/contact)
   utils/cn.ts          # twMerge(clsx) — always merge via cn()
-public/images/         # hero-shrine.jpg + shepherd-emblem.jpg via /images/<slug>.jpg (Vite publicDir → dist/images/ — upload alongside dist/index.html); whatToSee cards use Pexels CDN URLs in src/data/content.ts
+public/images/         # hero-shrine.jpg + shepherd-emblem.jpg via /images/<slug>.jpg (Vite publicDir → dist/images/ — upload alongside dist/index.html); Pexels CDN for hero/whatToSee with local fallback
 ```
 
 ## Quirks — would break if guessed wrong
@@ -51,8 +52,8 @@ public/images/         # hero-shrine.jpg + shepherd-emblem.jpg via /images/<slug
 
 - **Routing:** `App.tsx` is the only route table. Preserve legacy aliases (`/about`↔`/about-blessed-stanley-rother`, `/what-to-see`↔`/grounds-art-architecture`, `/pilgrimage`↔`/visit-planning`↔`/hours-location`, `/news-events`↔`/news-and-events`, `/give`↔`/shrinegift`, `#pilgrim-center|#shrine-church|#tepeyac-hill`). Nav is driven by `src/data/nav.ts` — update there, `Header`/`Footer` render from it.
 - **Data:** `src/data/content.ts` is the data layer (`lifeTimeline`, `whatToSee`, `faqs`, `upcomingEvents`, `givingOptions` with typed interfaces). Pages render from it — don't inline copy.
-- **Components:** `Button` (`to` for internal, `href` for external; variants `primary|secondary|ghost|outline-light` via `variantClasses`), `Container` (`max-w-7xl px-5 sm:px-8`), `SectionHeading` (`eyebrow/title/description` + `align/light`), `PageHero` (maroon-900 + image at `opacity-25` + gradients). Extend via `cn()`, not ad-hoc class strings.
-- **Styling:** Use `shrine-cream/parchment/stone/ink/charcoal/maroon-*/gold-*/pine-*` + `shadow-shrine` + utilities `text-balance` / `bg-adobe-texture` / `divider-weave`. Mobile-first (`sm:`/`lg:`).
+- **Components:** `Button` (discriminated `to`/`href`/native `button` + `icon`; variants `primary|secondary|ghost|outline-light`), `Container` (`max-w-7xl px-5 sm:px-8`), `SectionHeading` (`eyebrow/title/description` + `align/light` + line), `PageHero` (`compact?`, `bg-grain` + dual gradients), `Reveal` (`delay`/`as`), `Accordion` (single-open), `Timeline` (alternating rail). Extend via `cn()`, not ad-hoc class strings.
+- **Styling:** Use `shrine-cream/parchment(+dark)/stone/ink/charcoal/maroon-*/gold-*/pine-*/terracotta-*` + `shadow-shrine`/`shadow-shrine-lg` + utilities `text-balance` / `bg-adobe-texture` / `bg-grain` / `divider-weave`/`divider-weave-thin` / `reveal` / `skip-link` / `mask-fade-b`. Mobile-first (`sm:`/`lg:`).
 
 ## Don't
 

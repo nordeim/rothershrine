@@ -5,6 +5,7 @@ import { Reveal } from "@/components/ui/Reveal";
 import { Accordion } from "@/components/ui/Accordion";
 import { Button } from "@/components/ui/Button";
 import { faqs } from "@/data/content";
+import { site } from "@/data/site";
 
 export function FAQ() {
   return (
@@ -30,7 +31,7 @@ export function FAQ() {
           <Reveal delay={150} className="mt-12 rounded-sm border border-shrine-stone bg-shrine-parchment p-7 text-center">
             <p className="text-shrine-charcoal/85">Still have a question we haven't answered?</p>
             <div className="mt-5">
-              <Button href="mailto:info@rothershrine.org" variant="secondary">
+              <Button href={`mailto:${site.contact.email}`} variant="secondary">
                 Ask the Pilgrimage Office
               </Button>
             </div>
