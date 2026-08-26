@@ -27,7 +27,7 @@ All commands verified in `package.json` `scripts`. Don't document a script until
 src/
   App.tsx              # HashRouter + alias routes (see below)
   main.tsx             # StrictMode + createRoot
-  index.css            # @theme tokens (22) + @layer base/utilities (10)
+  index.css            # @theme tokens (24 colors + 2 shadows) + @layer base/utilities (10)
   components/          # Layout (+SkipLink), Header (useScrolled), Footer, PageHero, Emblem, Timeline, SocialIcons, ui/{Button,Container,SectionHeading,Accordion,Reveal}
   hooks/               # useScrolled.ts
   pages/               # Home, AboutRother, History, WhatToSee, Pilgrimage, NewsEvents, Volunteer, Give, FAQ, NotFound (named exports)

@@ -76,7 +76,7 @@ Apply to every non-trivial task. Do not skip VALIDATE.
 #### Tailwind CSS v4 — CSS-First `@theme`
 
 - Tokens live in `src/index.css` `@theme` block. Extend there; do not introduce arbitrary `bg-[#...]` values.
-- Palette: `shrine-cream / parchment / stone / ink / charcoal / maroon-{50,100,300,500,600,700,900} / gold-{100,300,500,600} / pine-{500,600,700}` plus `shadow-shrine`. Use semantic names (`shrine-maroon-600`) not hex.
+- Palette: `shrine-cream / parchment(+dark) / stone / ink / charcoal / maroon-{50,100,500,600,700,800,900,950} / gold-{100,300,400,500,600} / pine-{500,600,700} / terracotta-{400,500}` plus `shadow-shrine/shrine-lg` (24 colors + 2 shadows). Use semantic names (`shrine-maroon-600`) not hex.
 - Display = `Fraunces`, body = `Source Sans 3`; heading styles set on `h1–h4, .font-display`. Google Fonts loaded in `index.html` — add weights only with purpose.
 - Utilities: `text-balance`, `bg-adobe-texture`, `divider-weave` are bespoke; document new utilities alongside them.
 - Mobile-first, responsive (`sm:` / `lg:`), and dark-mode tolerant even though the shrine theme is light-first.

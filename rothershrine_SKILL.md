@@ -75,7 +75,7 @@ deploy: vite-plugin-singlefile → dist/index.html + dist/images/ → GH Pages /
 | Language | `typescript` / `@types/react` / `@types/react-dom` / `@types/node` | `5.9.3` / `19.2.18` / `19.2.5` / `22.20.1` | `strict` + `noUnusedLocals/Params` — breaches fail `tsc` |
 | Icons | `lucide-react` | `1.34.0` | Header/footer + `Home` quick-facts |
 | Utils | `clsx` / `tailwind-merge` | `2.1.1` / `3.6.0` | `cn()` = `twMerge(clsx(...))` — only merge path |
-| Bundling | `vite-plugin-singlefile` | `2.3.3` | Inlines JS+CSS into `dist/index.html` (~370 kB, gzip ~108 kB; `public/images/` → `dist/images/`) |
+| Bundling | `vite-plugin-singlefile` | `2.3.3` | Inlines JS+CSS into `dist/index.html` (~381 kB, gzip ~110 kB; `public/images/` → `dist/images/`) |
 | Fonts | Google Fonts (CDN, `index.html`) | — | `Fraunces` 400/500/600/700 + `Source Sans 3` 400/500/600/700; no runtime loader |
 
 **Environment:** No `.env.example`, no DB, no auth, no `docker`/`compose`. `pnpm` preferred (`--frozen-lockfile` in CI — versions pinned exact in `package.json`), `npm` works via `npm ci`. `skills/` is a symlink to `~/.pi/agent/skills` (ignored).
@@ -102,7 +102,7 @@ npx tsc --noEmit        # type gate — must be silent
 |---|---|---|
 | `vite.config.ts` | `plugins: [react(), tailwindcss(), viteSingleFile()]` + `resolve.alias["@"]` via `path.resolve(__dirname,"src")` | **Order matters.** `@` must stay in sync with `tsconfig.json` `paths`. |
 | `tsconfig.json` | `ES2020`/`ESNext`/`bundler`/`react-jsx`/`strict`/`noUnused*`/`isolatedModules`/`noEmit` + `include ["src","vite.config.ts"]` + `types ["node"]` | Adding a file outside `src/` requires expanding `include`. |
-| `src/index.css` | `@import "tailwindcss"` + `@theme` (19 tokens) + `@layer base/utilities` | Only token source; no `tailwind.config.*` exists. |
+| `src/index.css` | `@import "tailwindcss"` + `@theme` (24 colors + 2 shadows) + `@layer base/utilities` | Only token source; no `tailwind.config.*` exists. |
 | `index.html` | `lang en`, `viewport`, `meta description`, preconnect `fonts.googleapis.com`, `Fraunces`+`Source Sans 3`, `#root` + `src/main.tsx` | Fonts belong here, not in JS. |
 | `.gitignore` | Ignores `node_modules/`, `.next/`, `dist/`, `skills/` + `nohup.out`, `.venv`, `bak.git/` | `skills` symlink must not be committed. |
 
@@ -182,7 +182,7 @@ npx tsc --noEmit        # type gate — must be silent
 
 - Shadows: `shadow-shrine` (default) + `shadow-shrine-lg` (elevated cards/dropdowns). Radii are `rounded-sm` (buttons/cards) and `rounded-full` (emblem icon). Don't introduce `shadow-lg`/`rounded-xl` without a rationale.
 
-**Verification:** `grep --color shrine- src/index.css` → 22 tokens + 2 shadows; copy-paste `@theme` into this doc to prevent drift.
+**Verification:** `grep --color shrine- src/index.css` → 24 colors + 2 shadows (26 theme entries); copy-paste `@theme` into this doc to prevent drift.
 
 ---
 
@@ -200,13 +200,13 @@ index.html (#root) → src/main.tsx (StrictMode+createRoot)
 
 No global store, no API layer, no `server/` — add only with an ADR.
 
-### 5.2 Directory Inventory (30 files)
+### 5.2 Directory Inventory (31 files)
 
 ```
 src/
   App.tsx                 # HashRouter + 15 routes (7 alias pairs + 3 hash anchors + *)
   main.tsx                # StrictMode + createRoot
-  index.css               # @theme (22 tokens) + base + utilities (10)
+  index.css               # @theme (24 colors + 2 shadows) + base + utilities (10)
   components/
     Layout.tsx            # Outlet + hash-aware scroll restoration + SkipLink
     Header.tsx            # z-50 maroon-900 sticky, useScrolled, hover+click dropdown, mobile drawer
@@ -432,7 +432,7 @@ Run in order — every step must be green before pushing `main` (`main` is the d
 
 ```bash
 npx tsc --noEmit               # 1 — type gate (no output = pass)
-pnpm build                     # 2 — singlefile build → dist/index.html (~370 kB, gzip ~108 kB; + dist/images/)
+pnpm build                     # 2 — singlefile build → dist/index.html (~381 kB, gzip ~110 kB; + dist/images/)
 pnpm preview &                 # 3 — smoke: spot-check 10 routes + 4 hash anchors
 ls -lh dist/                   # 4 — confirm dist/index.html + dist/images/ (publicDir copy expected)
 # 5 — axe/Lighthouse a11y spot-check on Header + Home hero + FAQ
@@ -836,7 +836,7 @@ This project follows **ANALYZE → PLAN → VALIDATE → IMPLEMENT → VERIFY �
 | 60-sec agent cheat sheet | `AGENTS.md` |
 | Deep workflow + anti-generic | `CLAUDE.md` |
 | Intent lineage | `docs/prompts.md` |
-| Tokens (22) + utilities (10) | `src/index.css` (`--font-sans` alias `--font-body`) |
+| Tokens (24 colors + 2 shadows) + utilities (10) | `src/index.css` (`--font-sans` alias `--font-body`) |
 | Route table + aliases | `src/App.tsx` (named exports) |
 | Nav single-source | `src/data/nav.ts` (with `description`) |
 | Content arrays (5) + site | `src/data/content.ts` (`category`, `icon`) + `src/data/site.ts` |
@@ -846,4 +846,4 @@ This project follows **ANALYZE → PLAN → VALIDATE → IMPLEMENT → VERIFY �
 | Images | `public/images/*.jpg` (local fallback) + Pexels CDN for hero/whatToSee (onError→local) → `dist/images/` |
 | Vite alias + singlefile | `vite.config.ts` |
 | TS strict + include | `tsconfig.json` (includes `src/data/site.ts` via `src`) |
-| Pre-ship gate | `npx tsc --noEmit && pnpm build` (~380kB/110kB + dist/images/) → `pnpm preview` |
+| Pre-ship gate | `npx tsc --noEmit && pnpm build` (~381kB/110kB + dist/images/) → `pnpm preview` |

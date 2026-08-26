@@ -75,7 +75,7 @@ flowchart TB
 ├── 📂 src/
 │   ├── 📄 App.tsx           # HashRouter + 15 routes (7 alias pairs + 3 hash anchors + *)
 │   ├── 📄 main.tsx          # StrictMode + createRoot
-│   ├── 📄 index.css         # @theme shrine-* tokens (22) + @layer base/utilities
+│   ├── 📄 index.css         # @theme shrine-* tokens (24 colors + 2 shadows) + @layer base/utilities
 │   ├── 📂 components/
 │   │   ├── 📄 Layout.tsx    # Outlet + scroll/hash restoration + SkipLink
 │   │   ├── 📄 Header.tsx    # maroon-900 sticky, useScrolled, hover+click dropdown, mobile drawer
@@ -119,7 +119,7 @@ pnpm dev
 
 # 4 — Production build (single file + public assets)
 pnpm build
-# → dist/index.html  ~370 kB (gzip ~108 kB), JS+CSS inlined; dist/images/ copied from public/
+# → dist/index.html  ~381 kB (gzip ~110 kB), JS+CSS inlined; dist/images/ copied from public/
 
 # Preview prod build
 pnpm preview
@@ -138,7 +138,7 @@ ls -lh dist/index.html    # expect: single HTML file, no separate assets chunk
 |---|---|
 | `pnpm dev` | Vite ready on `:5173`, HMR active |
 | `npx tsc --noEmit` | Exit `0`, no errors |
-| `pnpm build` | `dist/index.html` exists (~370 kB, gzip ~108 kB) + `dist/images/` |
+| `pnpm build` | `dist/index.html` exists (~381 kB, gzip ~110 kB) + `dist/images/` |
 | `pnpm preview` | Prod preview on `:4173`, all alias routes + `#hash` anchors navigate |
 
 ## Design System
