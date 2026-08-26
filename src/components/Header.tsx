@@ -1,23 +1,18 @@
 import { useEffect, useState } from "react";
-import { Link, NavLink, useLocation } from "react-router-dom";
-import { ChevronDown, MapPin, Menu, Phone, X } from "lucide-react";
-import { Container } from "./ui/Container";
-import { Button } from "./ui/Button";
-import { primaryNav } from "../data/nav";
-import { cn } from "../utils/cn";
+import { Link, NavLink as RouterNavLink, useLocation } from "react-router-dom";
+import { ChevronDown, Menu, X } from "lucide-react";
+import { Container } from "@/components/ui/Container";
+import { Button } from "@/components/ui/Button";
+import { Emblem } from "@/components/Emblem";
+import { primaryNav } from "@/data/nav";
+import { useScrolled } from "@/hooks/useScrolled";
+import { cn } from "@/utils/cn";
 
 export function Header() {
-  const [scrolled, setScrolled] = useState(false);
+  const scrolled = useScrolled();
+  const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openDesktopMenu, setOpenDesktopMenu] = useState<string | null>(null);
-  const location = useLocation();
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
-    onScroll();
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   useEffect(() => {
     setMobileOpen(false);
@@ -25,139 +20,138 @@ export function Header() {
   }, [location.pathname]);
 
   return (
-    <header className="sticky top-0 z-50">
-      <div className="hidden bg-shrine-maroon-900 text-shrine-cream/90 sm:block">
-        <Container className="flex items-center justify-between py-1.5 text-xs">
-          <div className="flex items-center gap-5">
-            <span className="inline-flex items-center gap-1.5">
-              <MapPin className="h-3.5 w-3.5 text-shrine-gold-300" aria-hidden="true" />
-              7501 NW Expressway, Oklahoma City, OK
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <Phone className="h-3.5 w-3.5 text-shrine-gold-300" aria-hidden="true" />
-              (405) 555-0128
-            </span>
-          </div>
-          <span className="uppercase tracking-[0.2em] text-shrine-gold-300">
-            Feast Day &middot; July 28
-          </span>
+    <header
+      className={cn(
+        "sticky top-0 z-50 w-full transition-all duration-300",
+        scrolled
+          ? "bg-shrine-maroon-900/95 shadow-shrine backdrop-blur"
+          : "bg-shrine-maroon-900",
+      )}
+    >
+      <div className="hidden border-b border-shrine-cream/10 bg-shrine-maroon-950/60 lg:block">
+        <Container className="flex items-center justify-end gap-6 py-1.5 text-xs font-medium uppercase tracking-wide text-shrine-cream/70">
+          <Link to="/pilgrimage" className="transition-colors hover:text-shrine-gold-300">
+            Hours &amp; Location
+          </Link>
+          <Link to="/faq" className="transition-colors hover:text-shrine-gold-300">
+            FAQ
+          </Link>
+          <Link to="/give" className="transition-colors hover:text-shrine-gold-300">
+            Give
+          </Link>
         </Container>
       </div>
 
-      <div
-        className={cn(
-          "border-b transition-colors duration-300",
-          scrolled
-            ? "border-shrine-stone/60 bg-shrine-cream/95 backdrop-blur"
-            : "border-transparent bg-shrine-cream",
-        )}
-      >
-        <Container className="flex items-center justify-between py-3">
-          <Link to="/" className="flex items-center gap-3">
-            <span className="flex h-11 w-11 items-center justify-center rounded-full bg-shrine-maroon-600 text-shrine-gold-300 shadow-shrine">
-              <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth={1.6}>
-                <path d="M12 3v18M6 8h12M4 21c1.5-3 4-4 8-4s6.5 1 8 4" strokeLinecap="round" strokeLinejoin="round" />
-                <circle cx="12" cy="6" r="2.4" />
-              </svg>
+      <Container className="flex h-20 items-center justify-between gap-4">
+        <Link to="/" className="flex items-center gap-3 text-shrine-cream" aria-label="Blessed Stanley Rother Shrine — home">
+          <Emblem className="text-shrine-gold-300" />
+          <span className="flex flex-col leading-none">
+            <span className="font-display text-lg font-semibold tracking-wide">Rother Shrine</span>
+            <span className="mt-1 text-[10px] font-semibold uppercase tracking-[0.3em] text-shrine-cream/60">
+              Oklahoma City
             </span>
-            <span className="leading-tight">
-              <span className="block font-display text-lg font-semibold tracking-tight text-shrine-maroon-700 sm:text-xl">
-                Blessed Stanley Rother
-              </span>
-              <span className="block text-[11px] font-semibold uppercase tracking-[0.3em] text-shrine-charcoal/70">
-                National Shrine
-              </span>
-            </span>
-          </Link>
+          </span>
+        </Link>
 
-          <nav className="hidden items-center gap-1 lg:flex">
-            {primaryNav.map((item) => (
-              <div
-                key={item.label}
-                className="relative"
-                onMouseEnter={() => item.children && setOpenDesktopMenu(item.label)}
-                onMouseLeave={() => item.children && setOpenDesktopMenu(null)}
-              >
-                <NavLink
+        <nav className="hidden items-center gap-1 lg:flex" aria-label="Primary">
+          {primaryNav.map((item) => (
+            <div
+              key={item.label}
+              className="relative"
+              onMouseEnter={() => item.children && setOpenDesktopMenu(item.label)}
+              onMouseLeave={() => item.children && setOpenDesktopMenu(null)}
+            >
+              {item.children ? (
+                <button
+                  type="button"
+                  className="flex items-center gap-1 rounded-sm px-4 py-2 text-sm font-semibold uppercase tracking-wide text-shrine-cream/85 transition-colors hover:text-shrine-gold-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-shrine-gold-500"
+                  aria-haspopup="true"
+                  aria-expanded={openDesktopMenu === item.label}
+                  onClick={() => setOpenDesktopMenu((cur) => (cur === item.label ? null : item.label))}
+                >
+                  {item.label}
+                  <ChevronDown className="h-3.5 w-3.5" aria-hidden="true" />
+                </button>
+              ) : (
+                <RouterNavLink
                   to={item.to}
                   className={({ isActive }) =>
                     cn(
-                      "flex items-center gap-1 rounded-sm px-3 py-2 text-sm font-semibold uppercase tracking-wide text-shrine-charcoal transition-colors hover:text-shrine-maroon-600",
-                      isActive && "text-shrine-maroon-600",
+                      "block rounded-sm px-4 py-2 text-sm font-semibold uppercase tracking-wide text-shrine-cream/85 transition-colors hover:text-shrine-gold-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-shrine-gold-500",
+                      isActive && "text-shrine-gold-300",
                     )
                   }
                 >
                   {item.label}
-                  {item.children ? <ChevronDown className="h-3.5 w-3.5" aria-hidden="true" /> : null}
-                </NavLink>
-                {item.children && openDesktopMenu === item.label ? (
-                  <div className="absolute left-0 top-full w-64 rounded-sm border border-shrine-stone/60 bg-shrine-cream py-2 shadow-shrine">
-                    {item.children.map((child) => (
-                      <Link
-                        key={child.label}
-                        to={child.to}
-                        className="block px-4 py-2 text-sm text-shrine-charcoal hover:bg-shrine-parchment hover:text-shrine-maroon-600"
-                      >
-                        {child.label}
-                      </Link>
-                    ))}
+                </RouterNavLink>
+              )}
+
+              {item.children && openDesktopMenu === item.label ? (
+                <div className="absolute left-1/2 top-full w-80 -translate-x-1/2 pt-3">
+                  <div className="overflow-hidden rounded-sm border border-shrine-gold-300/20 bg-shrine-maroon-950 shadow-shrine-lg">
+                    <ul>
+                      {item.children.map((child) => (
+                        <li key={child.to}>
+                          <Link
+                            to={child.to}
+                            className="block px-5 py-3.5 transition-colors hover:bg-shrine-maroon-800"
+                          >
+                            <span className="block text-sm font-semibold text-shrine-cream">{child.label}</span>
+                            {child.description ? (
+                              <span className="mt-0.5 block text-xs text-shrine-cream/60">{child.description}</span>
+                            ) : null}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-                ) : null}
-              </div>
-            ))}
-          </nav>
+                </div>
+              ) : null}
+            </div>
+          ))}
+        </nav>
 
-          <div className="hidden items-center gap-3 lg:flex">
-            <Button to="/pilgrimage#visit" variant="ghost" className="!px-4 !py-2 normal-case">
-              Plan Your Visit
-            </Button>
-            <Button to="/give" variant="primary" className="!px-5 !py-2.5">
-              Give
-            </Button>
-          </div>
+        <div className="hidden lg:block">
+          <Button to="/give" variant="primary">
+            Give
+          </Button>
+        </div>
 
-          <button
-            type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-sm text-shrine-maroon-600 lg:hidden"
-            aria-label={mobileOpen ? "Close menu" : "Open menu"}
-            aria-expanded={mobileOpen}
-            onClick={() => setMobileOpen((prev) => !prev)}
-          >
-            {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
-        </Container>
-      </div>
+        <button
+          type="button"
+          className="rounded-sm p-2 text-shrine-cream lg:hidden"
+          aria-label={mobileOpen ? "Close menu" : "Open menu"}
+          aria-expanded={mobileOpen}
+          onClick={() => setMobileOpen((v) => !v)}
+        >
+          {mobileOpen ? <X className="h-6 w-6" aria-hidden="true" /> : <Menu className="h-6 w-6" aria-hidden="true" />}
+        </button>
+      </Container>
 
       {mobileOpen ? (
-        <div className="border-b border-shrine-stone/60 bg-shrine-cream lg:hidden">
+        <div className="border-t border-shrine-cream/10 bg-shrine-maroon-950 lg:hidden">
           <Container className="flex flex-col gap-1 py-4">
             {primaryNav.map((item) => (
-              <div key={item.label} className="border-b border-shrine-stone/40 pb-2">
-                <Link
-                  to={item.to}
-                  className="block py-2 text-sm font-semibold uppercase tracking-wide text-shrine-charcoal"
-                >
+              <div key={item.label} className="border-b border-shrine-cream/10 py-2 last:border-none">
+                <Link to={item.to} className="block py-2 text-base font-semibold text-shrine-cream">
                   {item.label}
                 </Link>
                 {item.children ? (
-                  <div className="ml-3 flex flex-col gap-1 pb-1">
+                  <ul className="ml-3 flex flex-col gap-1 border-l border-shrine-cream/15 pl-4">
                     {item.children.map((child) => (
-                      <Link key={child.label} to={child.to} className="py-1 text-sm text-shrine-charcoal/80">
-                        {child.label}
-                      </Link>
+                      <li key={child.to}>
+                        <Link to={child.to} className="block py-1.5 text-sm text-shrine-cream/75">
+                          {child.label}
+                        </Link>
+                      </li>
                     ))}
-                  </div>
+                  </ul>
                 ) : null}
               </div>
             ))}
-            <div className="mt-3 flex flex-col gap-2">
-              <Button to="/pilgrimage#visit" variant="secondary">
-                Plan Your Visit
-              </Button>
-              <Button to="/give" variant="primary">
-                Give
-              </Button>
-            </div>
+            <Button to="/give" variant="primary" className="mt-3 w-full">
+              Give
+            </Button>
           </Container>
         </div>
       ) : null}

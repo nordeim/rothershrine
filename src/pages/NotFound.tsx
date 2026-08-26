@@ -1,18 +1,29 @@
-import { Button } from "../components/ui/Button";
-import { Container } from "../components/ui/Container";
+import { Container } from "@/components/ui/Container";
+import { Button } from "@/components/ui/Button";
+import { Emblem } from "@/components/Emblem";
+import { ArrowRight } from "lucide-react";
 
-export default function NotFound() {
+export function NotFound() {
   return (
-    <Container className="flex min-h-[60vh] flex-col items-center justify-center gap-6 py-24 text-center">
-      <p className="font-display text-6xl font-semibold text-shrine-maroon-600">404</p>
-      <h1 className="font-display text-2xl font-semibold text-shrine-ink">This path isn't on the map</h1>
-      <p className="max-w-md text-sm leading-relaxed text-shrine-charcoal">
-        The page you're looking for may have moved. Return home to continue planning your
-        pilgrimage.
-      </p>
-      <Button to="/" variant="primary">
-        Back to Home
-      </Button>
-    </Container>
+    <section className="flex min-h-[70vh] items-center bg-shrine-cream py-24">
+      <Container className="text-center">
+        <Emblem className="mx-auto h-14 w-14 text-shrine-maroon-500" />
+        <p className="mt-6 text-xs font-semibold uppercase tracking-[0.35em] text-shrine-maroon-500">Page Not Found</p>
+        <h1 className="mt-4 text-balance font-display text-4xl font-semibold text-shrine-maroon-700 sm:text-5xl">
+          This path doesn't lead to the Shrine.
+        </h1>
+        <p className="mx-auto mt-5 max-w-md text-shrine-charcoal/80">
+          The page you're looking for may have moved. Let's get you back on the pilgrimage.
+        </p>
+        <div className="mt-9 flex flex-wrap items-center justify-center gap-4">
+          <Button to="/" variant="primary" icon={<ArrowRight className="h-4 w-4" aria-hidden="true" />}>
+            Return Home
+          </Button>
+          <Button to="/pilgrimage" variant="ghost">
+            Plan a Visit
+          </Button>
+        </div>
+      </Container>
+    </section>
   );
 }

@@ -1,92 +1,105 @@
 import { Link } from "react-router-dom";
-import { Camera, Mail, MapPin, MessageCircle, Phone, Video } from "lucide-react";
-import { Container } from "./ui/Container";
-import { footerNav } from "../data/nav";
+import { Clock, MapPin } from "lucide-react";
+import { Container } from "@/components/ui/Container";
+import { Emblem } from "@/components/Emblem";
+import { FacebookIcon, InstagramIcon, YoutubeIcon } from "@/components/SocialIcons";
+import { footerNav } from "@/data/nav";
+
+const exploreLinks = footerNav.slice(0, 4);
+const involvedLinks = footerNav.slice(4, 7);
+const visitLinks = footerNav.slice(7);
 
 export function Footer() {
   return (
-    <footer className="bg-shrine-maroon-900 text-shrine-cream/85">
-      <div className="divider-weave h-1.5 w-full" aria-hidden="true" />
-      <Container className="grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-4">
+    <footer className="bg-shrine-maroon-900 text-shrine-cream">
+      <div className="divider-weave-thin" />
+      <Container className="grid gap-12 py-16 sm:py-20 lg:grid-cols-[1.2fr_0.8fr_0.8fr_1fr]">
         <div>
-          <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-shrine-gold-500 text-shrine-maroon-900">
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.6}>
-                <path d="M12 3v18M6 8h12M4 21c1.5-3 4-4 8-4s6.5 1 8 4" strokeLinecap="round" strokeLinejoin="round" />
-                <circle cx="12" cy="6" r="2.4" />
-              </svg>
-            </span>
-            <span className="font-display text-lg font-semibold text-shrine-cream">
-              Blessed Stanley Rother Shrine
-            </span>
-          </div>
-          <p className="mt-4 text-sm leading-relaxed text-shrine-cream/70">
-            A National Shrine of the Archdiocese of Oklahoma City, welcoming pilgrims to learn the
-            story of the shepherd who stayed, and to pray at his tomb.
+          <Link to="/" className="flex items-center gap-3">
+            <Emblem className="text-shrine-gold-300" />
+            <span className="font-display text-xl font-semibold">Blessed Stanley Rother Shrine</span>
+          </Link>
+          <p className="mt-4 max-w-sm text-sm leading-relaxed text-shrine-cream/70">
+            The National Shrine of Blessed Stanley Rother welcomes pilgrims of every background to walk the story of
+            the shepherd who stayed — from an Oklahoma wheat farm to a martyr's grave in Guatemala.
           </p>
-          <div className="mt-5 flex items-center gap-3">
-            {[MessageCircle, Camera, Video].map((Icon, index) => (
-              <a
-                key={index}
-                href="#"
-                aria-label="Shrine social media"
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-shrine-cream/25 text-shrine-cream/80 transition-colors hover:border-shrine-gold-300 hover:text-shrine-gold-300"
-              >
-                <Icon className="h-4 w-4" aria-hidden="true" />
-              </a>
-            ))}
+          <div className="mt-6 flex items-center gap-3">
+            <a
+              href="https://www.facebook.com/"
+              aria-label="Rother Shrine on Facebook"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-shrine-cream/25 transition-colors hover:border-shrine-gold-300 hover:text-shrine-gold-300"
+            >
+              <FacebookIcon className="h-4 w-4" />
+            </a>
+            <a
+              href="https://www.instagram.com/"
+              aria-label="Rother Shrine on Instagram"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-shrine-cream/25 transition-colors hover:border-shrine-gold-300 hover:text-shrine-gold-300"
+            >
+              <InstagramIcon className="h-4 w-4" />
+            </a>
+            <a
+              href="https://www.youtube.com/"
+              aria-label="Rother Shrine on YouTube"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-shrine-cream/25 transition-colors hover:border-shrine-gold-300 hover:text-shrine-gold-300"
+            >
+              <YoutubeIcon className="h-4 w-4" />
+            </a>
           </div>
         </div>
 
-        <div>
+        <nav aria-label="Explore">
           <h3 className="text-xs font-semibold uppercase tracking-[0.25em] text-shrine-gold-300">Explore</h3>
-          <ul className="mt-4 space-y-2.5 text-sm">
-            {footerNav.slice(0, 5).map((link) => (
-              <li key={link.label}>
-                <Link to={link.to} className="text-shrine-cream/75 hover:text-shrine-cream">
+          <ul className="mt-4 space-y-2.5">
+            {exploreLinks.map((link) => (
+              <li key={link.to}>
+                <Link to={link.to} className="text-sm text-shrine-cream/75 transition-colors hover:text-shrine-cream">
                   {link.label}
                 </Link>
               </li>
             ))}
           </ul>
-        </div>
+        </nav>
 
-        <div>
+        <nav aria-label="Get involved">
           <h3 className="text-xs font-semibold uppercase tracking-[0.25em] text-shrine-gold-300">Get Involved</h3>
-          <ul className="mt-4 space-y-2.5 text-sm">
-            {footerNav.slice(5).map((link) => (
-              <li key={link.label}>
-                <Link to={link.to} className="text-shrine-cream/75 hover:text-shrine-cream">
+          <ul className="mt-4 space-y-2.5">
+            {involvedLinks.map((link) => (
+              <li key={link.to}>
+                <Link to={link.to} className="text-sm text-shrine-cream/75 transition-colors hover:text-shrine-cream">
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+            {visitLinks.map((link) => (
+              <li key={link.to}>
+                <Link to={link.to} className="text-sm text-shrine-cream/75 transition-colors hover:text-shrine-cream">
                   {link.label}
                 </Link>
               </li>
             ))}
           </ul>
-        </div>
+        </nav>
 
         <div>
           <h3 className="text-xs font-semibold uppercase tracking-[0.25em] text-shrine-gold-300">Visit Us</h3>
-          <ul className="mt-4 space-y-3 text-sm text-shrine-cream/75">
-            <li className="flex items-start gap-2">
+          <address className="mt-4 space-y-3 text-sm not-italic text-shrine-cream/75">
+            <p className="flex items-start gap-2.5">
               <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-shrine-gold-300" aria-hidden="true" />
-              7501 NW Expressway, Oklahoma City, OK 73132
-            </li>
-            <li className="flex items-center gap-2">
-              <Phone className="h-4 w-4 shrink-0 text-shrine-gold-300" aria-hidden="true" />
-              (405) 555-0128
-            </li>
-            <li className="flex items-center gap-2">
-              <Mail className="h-4 w-4 shrink-0 text-shrine-gold-300" aria-hidden="true" />
-              info@rothershrine.org
-            </li>
-          </ul>
+              13300 N Kelley Ave, Oklahoma City, OK 73131
+            </p>
+            <p className="flex items-start gap-2.5">
+              <Clock className="mt-0.5 h-4 w-4 shrink-0 text-shrine-gold-300" aria-hidden="true" />
+              Grounds open daily, 9 a.m.–5 p.m. Mass schedule varies — see Pilgrimage.
+            </p>
+          </address>
         </div>
       </Container>
 
-      <div className="border-t border-shrine-cream/10 py-5">
-        <Container className="flex flex-col items-center justify-between gap-3 text-xs text-shrine-cream/55 sm:flex-row">
-          <p>&copy; {new Date().getFullYear()} National Shrine of Blessed Stanley Rother. All rights reserved.</p>
-          <p>An Archdiocese of Oklahoma City Shrine &middot; Feast Day, July 28</p>
+      <div className="border-t border-shrine-cream/10">
+        <Container className="flex flex-col items-center justify-between gap-3 py-6 text-xs text-shrine-cream/55 sm:flex-row">
+          <p>© {new Date().getFullYear()} National Shrine of Blessed Stanley Rother, Archdiocese of Oklahoma City.</p>
+          <p>Feast Day — July 28</p>
         </Container>
       </div>
     </footer>

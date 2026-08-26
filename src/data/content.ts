@@ -24,13 +24,13 @@ export const lifeTimeline: TimelineEntry[] = [
       "Stanley volunteered to join the Oklahoma diocesan mission in Santiago Atitlán, Guatemala, serving the Tz'utujil Maya people on the shore of Lake Atitlán. He learned Spanish and, remarkably, the difficult Tz'utujil language, eventually helping translate the New Testament for a people who had never had Scripture in their own tongue.",
   },
   {
-    year: "1968-1981",
+    year: "1968–1981",
     title: "Farmer, Builder, Shepherd",
     description:
       "Known to his parish as 'Padre Apla's' — a Tz'utujil rendering of his middle name, Francisco — he worked beside farmers in the fields, helped build a hospital, a school, a farmers' co-op, and the first Catholic radio station in the region, all while serving as pastor to tens of thousands.",
   },
   {
-    year: "1980-1981",
+    year: "1980–1981",
     title: "Violence and a Choice to Stay",
     description:
       "As Guatemala's civil war intensified, catechists and parishioners of Santiago Atitlán were kidnapped or killed, and Father Rother's name appeared on a death list. He returned briefly to Oklahoma for safety in January 1981, but chose to go back to his parish for Holy Week, telling his family the shepherd should not run at the first sign of danger.",
@@ -42,7 +42,7 @@ export const lifeTimeline: TimelineEntry[] = [
       "In the early hours of July 28, 1981, three armed men entered the rectory in Santiago Atitlán and killed Father Rother. He was 46 years old. At his family's request, his body was returned to Okarche for burial, while his heart — at the request of his parishioners — remains enshrined in the church he served in Guatemala.",
   },
   {
-    year: "2016-2017",
+    year: "2016–2017",
     title: "Recognized as a Martyr",
     description:
       "Pope Francis formally recognized Stanley Rother's martyrdom in December 2016. He was beatified on September 23, 2017, in Oklahoma City — the first martyr and the first U.S.-born priest to be beatified.",
@@ -77,8 +77,8 @@ export const whatToSee: WhatToSeeSection[] = [
       "Group orientation room for pilgrimage leaders and school tours",
     ],
     image:
-      "https://images.pexels.com/photos/37522060/pexels-photo-37522060.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=1200",
-    imageAlt: "Sunlit stone hall with tall arched windows",
+      "https://images.pexels.com/photos/5825353/pexels-photo-5825353.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=1200",
+    imageAlt: "Sunlit stone hall with tall arched passages and a hanging chandelier",
   },
   {
     id: "shrine-church",
@@ -92,8 +92,8 @@ export const whatToSee: WhatToSeeSection[] = [
       "A pipe organ under construction to lead the community in song",
     ],
     image:
-      "https://images.pexels.com/photos/36260450/pexels-photo-36260450.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=1200",
-    imageAlt: "Gothic stone nave with rows of pews",
+      "https://images.pexels.com/photos/28892492/pexels-photo-28892492.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=1200",
+    imageAlt: "Vibrant stained glass windows glowing inside a cathedral nave",
   },
   {
     id: "tepeyac-hill",
@@ -107,8 +107,8 @@ export const whatToSee: WhatToSeeSection[] = [
       "Accessible paths connecting the hill to the Pilgrim Center and Shrine Church",
     ],
     image:
-      "https://images.pexels.com/photos/33277416/pexels-photo-33277416.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=1200",
-    imageAlt: "Chapel on a grassy hill at sunset",
+      "https://images.pexels.com/photos/28156382/pexels-photo-28156382.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=1200",
+    imageAlt: "A stone pathway winding through a lush garden at sunset",
   },
 ];
 
@@ -155,6 +155,7 @@ export interface EventItem {
   title: string;
   location: string;
   description: string;
+  category: "Feast" | "Pilgrimage" | "Formation" | "Community";
 }
 
 export const upcomingEvents: EventItem[] = [
@@ -162,76 +163,81 @@ export const upcomingEvents: EventItem[] = [
     date: "July 28",
     title: "Feast Day Mass & Celebration",
     location: "Shrine Church & Tepeyac Hill",
+    category: "Feast",
     description:
-      "The Shrine's principal feast, marking the anniversary of Blessed Stanley's martyrdom, with a bilingual Mass, a procession, and a celebration of Guatemalan music, food, and dance on the grounds.",
+      "The Shrine's principal feast, marking the anniversary of Blessed Stanley's martyrdom, with a bilingual Mass, a Guatemalan danza procession on Tepeyac Hill, and a parish potluck on the grounds.",
   },
   {
     date: "First Saturday, monthly",
     title: "Pilgrim Rosary Walk",
-    location: "Tepeyac Hill",
+    location: "Tepeyac Hill Rosary Path",
+    category: "Pilgrimage",
     description:
-      "A guided rosary procession along the hillside path, prayed in English and Spanish, followed by refreshments in the Pilgrim Center courtyard.",
+      "A guided, meditative walk of the rosary along Tepeyac Hill's outdoor stations, open to individuals and groups. Meet at the Pilgrim Center welcome desk fifteen minutes before the start time.",
   },
   {
-    date: "Ongoing",
-    title: "TASTE Speaker Series",
-    location: "Pilgrim Center Hall",
+    date: "September – November",
+    title: "TASTE: A Guatemalan Table",
+    location: "Pilgrim Center Café",
+    category: "Community",
     description:
-      "An evening lecture and dinner series exploring faith, mission, and the Guatemalan Church, hosted several times a year for the wider Oklahoma City community.",
+      "A rotating seasonal series pairing traditional Guatemalan dishes with short reflections on Padre Apla's ministry among the Tz'utujil, prepared with recipes from the Santiago Atitlán community.",
   },
   {
-    date: "Ongoing",
-    title: "Venerable Voices",
-    location: "Online & Pilgrim Center",
+    date: "Quarterly, Thursday evenings",
+    title: "Venerable Voices Speaker Series",
+    location: "Pilgrim Center Orientation Room",
+    category: "Formation",
     description:
-      "A recorded conversation series with people who knew Blessed Stanley or continue his mission today, part of the Shrine's ongoing oral history project.",
+      "Visiting scholars, missionaries, and members of the Rother family share formation talks on martyrdom, mission, and the road to sainthood — free and open to the public, with livestream for remote parish groups.",
   },
 ];
 
 export interface GivingOption {
-  title: string;
+  name: string;
   description: string;
+  icon: "flame" | "church" | "sprout" | "heart" | "book" | "hand-heart" | "landmark" | "globe";
 }
 
 export const givingOptions: GivingOption[] = [
   {
-    title: "General Fund",
-    description:
-      "Supports the daily operation of the Shrine — staffing, utilities, and welcoming the thousands of pilgrims who visit each year.",
+    name: "General Fund",
+    description: "Sustains daily operations of the Pilgrim Center, Shrine Church, and grounds for every visitor.",
+    icon: "flame",
   },
   {
-    title: "Building & Maintenance Gift",
-    description:
-      "Keeps the Pilgrim Center, Shrine Church, and Tepeyac Hill grounds in good repair for generations of pilgrims to come.",
+    name: "Pipe Organ Campaign",
+    description: "Completes the Shrine Church's pipe organ, built to lead pilgrims and parishioners in song for generations.",
+    icon: "church",
   },
   {
-    title: "Pipe Organ Project",
-    description:
-      "Funds the design and installation of a pipe organ for the Shrine Church, built to lead the community in worship for a century or more.",
+    name: "Apla's Circle",
+    description: "A monthly giving circle named for Padre Apla's, sustaining the Shrine's mission with recurring support.",
+    icon: "hand-heart",
   },
   {
-    title: "Shrine Endowment Gift",
-    description:
-      "A long-term gift held by the Communities Foundation to guarantee the Shrine's mission continues well beyond any single generation.",
+    name: "Tepeyac Hill Gardens",
+    description: "Maintains the native plantings, rosary walk, and amphitheater that welcome outdoor pilgrims and feast crowds.",
+    icon: "sprout",
   },
   {
-    title: "Apla's Circle",
-    description:
-      "A recognition society for pilgrims who make a recurring monthly gift in honor of 'Padre Apla's' — Blessed Stanley's parish nickname in Guatemala.",
+    name: "Guatemalan Mission Partnership",
+    description: "Supports the parish of Santiago Atitlán and the Tz'utujil communities Padre Apla's served and loved.",
+    icon: "globe",
   },
   {
-    title: "Tejedores Society",
-    description:
-      "Named for the weavers of Guatemala, this society honors major benefactors whose gifts help weave together the Shrine's future.",
+    name: "Pilgrim Scholarship Fund",
+    description: "Underwrites travel costs for school groups and low-income parishes making the pilgrimage to Oklahoma City.",
+    icon: "book",
   },
   {
-    title: "Rother Heritage Circle",
-    description:
-      "A planned-giving society for pilgrims who include the Shrine in their will or estate plans.",
+    name: "Docent & Volunteer Fund",
+    description: "Trains and equips the volunteer docents, greeters, and grounds stewards who welcome every pilgrim.",
+    icon: "heart",
   },
   {
-    title: "Shrine Saints Society",
-    description:
-      "A giving circle for sustained annual supporters who help underwrite exhibits, formation programs, and pilgrim hospitality.",
+    name: "Legacy & Planned Giving",
+    description: "Estate gifts, charitable trusts, and memorial bequests that secure the Shrine's future for the next century.",
+    icon: "landmark",
   },
 ];

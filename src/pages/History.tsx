@@ -1,78 +1,78 @@
-import { PageHero } from "../components/PageHero";
-import { Container } from "../components/ui/Container";
-import { SectionHeading } from "../components/ui/SectionHeading";
+import { PageHero } from "@/components/PageHero";
+import { Container } from "@/components/ui/Container";
+import { SectionHeading } from "@/components/ui/SectionHeading";
+import { Reveal } from "@/components/ui/Reveal";
+import { Timeline } from "@/components/Timeline";
+import type { TimelineEntry } from "@/data/content";
+import { lifeTimeline } from "@/data/content";
 
-const phases = [
+const pathToSainthood = lifeTimeline.filter((entry) => ["1981", "2016–2017", "2023"].includes(entry.year));
+
+const shrineMilestones: TimelineEntry[] = [
   {
+    year: "2017",
+    title: "A Home for the Beatification",
+    description:
+      "Following the September 2017 beatification Mass in Oklahoma City — attended by more than 20,000 pilgrims — the Archdiocese committed to building a permanent shrine so the newly Blessed Stanley Rother would have a lasting home for pilgrimage and prayer.",
+  },
+  {
+    year: "2018",
     title: "Groundbreaking",
-    year: "2019",
-    text:
-      "Following Blessed Stanley's beatification, the Archdiocese of Oklahoma City broke ground on a permanent Shrine to welcome the pilgrims who had already begun arriving by the thousands to a temporary chapel. Local families, Oklahoma farmers, and donors from across the country contributed to the earliest phase of the project.",
+    description:
+      "Ground was broken on farmland northeast of Oklahoma City, chosen for its proximity to Rother's boyhood home in Okarche and its capacity to welcome pilgrim buses, school groups, and outdoor feast-day crowds.",
   },
   {
-    title: "Construction",
-    year: "2020 – 2022",
-    text:
-      "Over three years, crews raised the Pilgrim Center, Shrine Church, and Chapel of the Tomb using regional limestone and reclaimed timber, echoing both the plains architecture of Okarche and the highland churches of Guatemala. Artists on two continents were commissioned for the mosaics, stained glass, and hand-carved altar.",
+    year: "2020",
+    title: "Foundations Through a Pandemic",
+    description:
+      "Construction of the Pilgrim Center and Shrine Church continued through 2020, with craftsmen sourcing stone, timber, and stained glass to reflect both Oklahoma's plains heritage and Guatemala's highland culture.",
   },
   {
-    title: "Dedication",
     year: "2023",
-    text:
-      "The Shrine Church was formally dedicated in a Mass attended by pilgrims from Oklahoma and Guatemala alike, including members of the Tz'utujil community Blessed Stanley had served. His remains were translated to the newly completed Chapel of the Tomb, where they rest today.",
+    title: "Dedication & Opening",
+    description:
+      "The Shrine Church was dedicated and the grounds opened to pilgrims, completing a promise made at the beatification six years earlier — a home where Blessed Stanley's story could be walked, not just read.",
   },
 ];
 
-export default function History() {
+export function History() {
   return (
     <div>
       <PageHero
-        eyebrow="History"
-        title="Building a home for pilgrims"
-        description="From a groundbreaking ceremony to a completed campus, the story of how the National Shrine came to stand in Oklahoma City."
-        image="/images/hero-shrine.jpg"
+        eyebrow="Our History"
+        title="History of the Shrine"
+        description="From a beatification Mass that filled an Oklahoma City arena to a permanent home for pilgrimage on Tepeyac Hill."
+        image="https://images.pexels.com/photos/10244422/pexels-photo-10244422.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1000&w=1800"
       />
 
-      <section className="py-20 sm:py-24">
+      <section className="py-24 sm:py-28">
         <Container>
-          <SectionHeading
-            eyebrow="Why a Shrine"
-            title="A place built to answer a growing pilgrimage"
-            description="Long before construction began, pilgrims were already finding their way to Oklahoma City to learn about Blessed Stanley Rother and to pray for his intercession. The Shrine was conceived to give that devotion a lasting, worthy home — one campus uniting the Pilgrim Center, the Shrine Church and Chapel of the Tomb, and the gardens of Tepeyac Hill."
-          />
-        </Container>
-      </section>
-
-      <section className="bg-shrine-parchment py-20 sm:py-24">
-        <Container>
-          <div className="grid gap-10 md:grid-cols-3">
-            {phases.map((phase, index) => (
-              <div key={phase.title} className="relative rounded-sm border border-shrine-stone/60 bg-shrine-cream p-8">
-                <span className="font-display text-5xl font-semibold text-shrine-stone">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-                <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-shrine-maroon-600">{phase.year}</p>
-                <h3 className="mt-1 font-display text-2xl font-semibold text-shrine-ink">{phase.title}</h3>
-                <p className="mt-4 text-sm leading-relaxed text-shrine-charcoal">{phase.text}</p>
-              </div>
-            ))}
+          <Reveal>
+            <SectionHeading
+              eyebrow="Path to Sainthood"
+              title="From martyrdom to beatification"
+              description="Three moments from Blessed Stanley's life mark the road that led here — his death in 1981, his beatification in 2017, and the Shrine's opening in 2023."
+              align="center"
+            />
+          </Reveal>
+          <div className="mx-auto mt-14 max-w-4xl">
+            <Timeline entries={pathToSainthood} />
           </div>
         </Container>
       </section>
 
-      <section className="py-20 sm:py-24">
-        <Container className="grid gap-12 lg:grid-cols-2 lg:items-center">
-          <img
-            src="https://images.pexels.com/photos/12271880/pexels-photo-12271880.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=1200"
-            alt="Stone church facade with warm afternoon light"
-            className="h-80 w-full rounded-sm object-cover shadow-shrine sm:h-96"
-          />
-          <div>
+      <section className="bg-shrine-parchment py-24 sm:py-28">
+        <Container>
+          <Reveal>
             <SectionHeading
-              eyebrow="Two Communities, One Story"
-              title="An Oklahoma shrine with a Guatemalan heart"
-              description="Every design choice on campus reflects the two places Blessed Stanley called home. Limestone quarried in Oklahoma anchors the Shrine Church, while carved doors, textile patterns, and garden plantings on Tepeyac Hill honor the Tz'utujil community of Santiago Atitlán that shaped the second half of his life."
+              eyebrow="Building the Shrine"
+              title="How Tepeyac Hill became sacred ground"
+              description="Six years separate the beatification Mass from the Shrine's dedication — years of fundraising, design, and construction guided by one goal: a place worthy of the story."
+              align="center"
             />
+          </Reveal>
+          <div className="mx-auto mt-14 max-w-4xl">
+            <Timeline entries={shrineMilestones} />
           </div>
         </Container>
       </section>

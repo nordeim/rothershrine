@@ -1,136 +1,133 @@
-import { Clock, Mail, MapPin, Navigation, Phone, Users } from "lucide-react";
-import { PageHero } from "../components/PageHero";
-import { Container } from "../components/ui/Container";
-import { SectionHeading } from "../components/ui/SectionHeading";
-import { Button } from "../components/ui/Button";
+import { PageHero } from "@/components/PageHero";
+import { Container } from "@/components/ui/Container";
+import { SectionHeading } from "@/components/ui/SectionHeading";
+import { Reveal } from "@/components/ui/Reveal";
+import { Button } from "@/components/ui/Button";
+import { Clock3, MapPin, Users, Navigation } from "lucide-react";
 
 const hours = [
-  { day: "Monday – Saturday", time: "9:00 AM – 5:00 PM" },
-  { day: "Sunday", time: "8:00 AM – 3:00 PM" },
-  { day: "Chapel of the Tomb", time: "Closes 30 minutes before the grounds" },
+  { label: "Pilgrim Center & Grounds", value: "Daily, 9 a.m. – 5 p.m." },
+  { label: "Shrine Church", value: "Daily, 7 a.m. – 7 p.m." },
+  { label: "Chapel of the Tomb", value: "Daily, 8 a.m. – 6 p.m." },
+  { label: "Gift Shop & Café", value: "Daily, 9 a.m. – 4:30 p.m." },
 ];
 
-const massTimes = [
-  { day: "Sunday", time: "8:00 AM, 10:30 AM, 1:00 PM (Español)" },
-  { day: "Monday – Friday", time: "12:10 PM" },
-  { day: "Saturday", time: "8:00 AM &middot; Vigil 5:30 PM" },
+const massSchedule = [
+  { label: "Sunday", value: "8:00 a.m. · 10:30 a.m. · 5:00 p.m. (Spanish)" },
+  { label: "Saturday Vigil", value: "5:00 p.m." },
+  { label: "Monday – Friday", value: "12:10 p.m." },
+  { label: "Holy Days", value: "See parish bulletin — times shift seasonally" },
 ];
 
-export default function Pilgrimage() {
+const groupSteps = [
+  {
+    title: "Reserve a date",
+    description: "Contact the pilgrimage office at least three weeks ahead for groups of 15 or more.",
+  },
+  {
+    title: "Choose your experience",
+    description: "Add a guided tour, Mass, a Guatemalan cultural presentation, or a boxed lunch in the café.",
+  },
+  {
+    title: "Arrive and check in",
+    description: "Group leaders check in at the Pilgrim Center welcome desk for orientation and parking guidance.",
+  },
+];
+
+export function Pilgrimage() {
   return (
     <div>
       <PageHero
-        eyebrow="Pilgrimage"
-        title="Plan your pilgrimage"
-        description="Whether you're coming alone, with your family, or leading a parish bus, here is everything you need to plan a meaningful visit."
-        image="/images/hero-shrine.jpg"
+        eyebrow="Plan Your Visit"
+        title="Pilgrimage"
+        description="Hours, Mass times, and everything a parish group, school tour, or individual pilgrim needs before arriving."
+        image="https://images.pexels.com/photos/7621196/pexels-photo-7621196.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1000&w=1800"
+        compact
       />
 
-      <section className="py-20 sm:py-24">
-        <Container>
-          <SectionHeading
-            eyebrow="What is a Pilgrimage?"
-            title="More than a visit"
-            description="A pilgrimage is a journey undertaken with intention — to pray, to ask, to give thanks, or simply to draw closer to a story that has shaped your own faith. Pilgrims to this Shrine come from every state and from Guatemala itself, walking the same grounds where Blessed Stanley's story is told and where his relics now rest. However you arrive, you are welcome to slow down, pray, and listen."
-          />
-        </Container>
-      </section>
+      <section id="visit" className="scroll-mt-28 py-24 sm:py-28">
+        <Container className="grid gap-12 lg:grid-cols-[1fr_0.9fr]">
+          <div className="space-y-12">
+            <Reveal>
+              <SectionHeading eyebrow="Hours & Location" title="When to come, and how to find us" />
+              <div className="mt-8 divide-y divide-shrine-stone rounded-sm border border-shrine-stone bg-shrine-cream">
+                {hours.map((row) => (
+                  <div key={row.label} className="flex items-center justify-between gap-4 px-6 py-4">
+                    <span className="text-sm font-semibold text-shrine-charcoal">{row.label}</span>
+                    <span className="text-sm text-shrine-charcoal/75">{row.value}</span>
+                  </div>
+                ))}
+              </div>
+            </Reveal>
 
-      <section id="visit" className="scroll-mt-24 bg-shrine-parchment py-20 sm:py-24">
-        <Container className="grid gap-12 lg:grid-cols-2">
-          <div className="space-y-8">
-            <div>
-              <h3 className="flex items-center gap-2 font-display text-2xl font-semibold text-shrine-ink">
-                <Clock className="h-5 w-5 text-shrine-maroon-600" aria-hidden="true" />
-                Shrine Hours
-              </h3>
-              <dl className="mt-4 space-y-3">
-                {hours.map((item) => (
-                  <div key={item.day} className="flex justify-between border-b border-shrine-stone/50 pb-2 text-sm">
-                    <dt className="text-shrine-charcoal/70">{item.day}</dt>
-                    <dd className="font-semibold text-shrine-ink">{item.time}</dd>
+            <Reveal delay={100}>
+              <SectionHeading eyebrow="Mass Schedule" title="Join us for Mass" />
+              <div className="mt-8 divide-y divide-shrine-stone rounded-sm border border-shrine-stone bg-shrine-cream">
+                {massSchedule.map((row) => (
+                  <div key={row.label} className="flex items-center justify-between gap-4 px-6 py-4">
+                    <span className="text-sm font-semibold text-shrine-charcoal">{row.label}</span>
+                    <span className="text-right text-sm text-shrine-charcoal/75">{row.value}</span>
                   </div>
                 ))}
-              </dl>
-            </div>
-            <div>
-              <h3 className="flex items-center gap-2 font-display text-2xl font-semibold text-shrine-ink">
-                <Users className="h-5 w-5 text-shrine-maroon-600" aria-hidden="true" />
-                Mass Schedule
-              </h3>
-              <dl className="mt-4 space-y-3">
-                {massTimes.map((item) => (
-                  <div key={item.day} className="flex justify-between border-b border-shrine-stone/50 pb-2 text-sm">
-                    <dt className="text-shrine-charcoal/70">{item.day}</dt>
-                    <dd
-                      className="text-right font-semibold text-shrine-ink"
-                      dangerouslySetInnerHTML={{ __html: item.time }}
-                    />
-                  </div>
-                ))}
-              </dl>
-            </div>
+              </div>
+            </Reveal>
           </div>
 
-          <div className="space-y-6">
-            <div className="rounded-sm border border-shrine-stone/60 bg-shrine-cream p-6">
-              <h3 className="flex items-center gap-2 font-display text-xl font-semibold text-shrine-ink">
-                <MapPin className="h-5 w-5 text-shrine-maroon-600" aria-hidden="true" />
-                Address
-              </h3>
-              <p className="mt-3 text-sm leading-relaxed text-shrine-charcoal">
-                7501 NW Expressway
+          <Reveal delay={150}>
+            <div className="rounded-sm border border-shrine-stone bg-shrine-maroon-900 p-8 text-shrine-cream shadow-shrine">
+              <MapPin className="h-8 w-8 text-shrine-gold-300" aria-hidden="true" />
+              <h3 className="mt-4 font-display text-2xl font-semibold">Find Us</h3>
+              <p className="mt-3 text-shrine-cream/80">
+                13300 N Kelley Ave
                 <br />
-                Oklahoma City, OK 73132
+                Oklahoma City, OK 73131
               </p>
-              <p className="mt-4 flex items-center gap-2 text-sm text-shrine-charcoal">
-                <Phone className="h-4 w-4 text-shrine-maroon-600" aria-hidden="true" /> (405) 555-0128
-              </p>
-              <p className="mt-2 flex items-center gap-2 text-sm text-shrine-charcoal">
-                <Mail className="h-4 w-4 text-shrine-maroon-600" aria-hidden="true" /> pilgrimage@rothershrine.org
-              </p>
+              <div className="mt-6 flex items-center gap-3 text-sm text-shrine-cream/70">
+                <Clock3 className="h-4 w-4 text-shrine-gold-300" aria-hidden="true" />
+                Free onsite parking, including accessible spaces near the main entrance.
+              </div>
               <Button
-                href="https://www.google.com/maps/search/?api=key&query=7501+NW+Expressway+Oklahoma+City+OK"
-                variant="secondary"
-                className="mt-5"
+                href="https://www.google.com/maps/search/?api=1&query=13300+N+Kelley+Ave+Oklahoma+City+OK"
+                variant="outline-light"
+                className="mt-7 w-full"
+                icon={<Navigation className="h-4 w-4" aria-hidden="true" />}
               >
-                <Navigation className="h-4 w-4" aria-hidden="true" /> Get Directions
+                Get Directions
               </Button>
             </div>
-            <div className="overflow-hidden rounded-sm border border-shrine-stone/60 shadow-shrine">
-              <iframe
-                title="Map to the National Shrine of Blessed Stanley Rother"
-                src="https://www.google.com/maps?q=7501+NW+Expressway,+Oklahoma+City,+OK+73132&output=embed"
-                className="h-64 w-full"
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-              />
-            </div>
-          </div>
+          </Reveal>
         </Container>
       </section>
 
-      <section className="py-20 sm:py-24">
-        <Container className="grid gap-12 lg:grid-cols-2">
-          <div className="rounded-sm border border-shrine-stone/60 bg-shrine-parchment p-8">
-            <h3 className="font-display text-2xl font-semibold text-shrine-ink">Individuals & Families</h3>
-            <p className="mt-4 text-sm leading-relaxed text-shrine-charcoal">
-              No reservation is needed — arrive any day during open hours, pick up a self-guided
-              tour map at the Pilgrim Center desk, and take as long as you'd like in the Chapel of
-              the Tomb or on Tepeyac Hill. Most individual visits last 45 minutes to an hour.
-            </p>
+      <section className="bg-shrine-parchment py-24 sm:py-28">
+        <Container>
+          <Reveal>
+            <SectionHeading
+              eyebrow="Group Visits"
+              title="Bringing a parish or school group?"
+              description="Most groups spend two to three hours; add Mass or a cultural presentation for a half-day pilgrimage."
+              align="center"
+            />
+          </Reveal>
+          <div className="mx-auto mt-14 grid max-w-4xl gap-8 sm:grid-cols-3">
+            {groupSteps.map((step, index) => (
+              <Reveal key={step.title} delay={index * 120}>
+                <div className="rounded-sm border border-shrine-stone bg-shrine-cream p-7 text-center">
+                  <span className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-shrine-maroon-600 font-display text-sm font-semibold text-shrine-gold-300">
+                    {index + 1}
+                  </span>
+                  <h3 className="mt-4 font-display text-lg font-semibold text-shrine-maroon-700">{step.title}</h3>
+                  <p className="mt-2.5 text-sm leading-relaxed text-shrine-charcoal/80">{step.description}</p>
+                </div>
+              </Reveal>
+            ))}
           </div>
-          <div className="rounded-sm border border-shrine-stone/60 bg-shrine-parchment p-8">
-            <h3 className="font-display text-2xl font-semibold text-shrine-ink">Groups & Parishes</h3>
-            <p className="mt-4 text-sm leading-relaxed text-shrine-charcoal">
-              Groups of ten or more should request a guided tour at least two weeks in advance.
-              Download the planning packet for sample itineraries, bus parking information, and
-              options for a group Mass or meal.
-            </p>
-            <Button href="#" variant="secondary" className="mt-5">
-              Download Planning Packet
-            </Button>
-          </div>
+          <Reveal delay={200} className="mt-12 flex justify-center">
+            <div className="flex items-center gap-3 rounded-sm bg-shrine-cream px-6 py-4 text-sm text-shrine-charcoal shadow-shrine">
+              <Users className="h-5 w-5 text-shrine-maroon-500" aria-hidden="true" />
+              Groups of 15+: email <a href="mailto:pilgrimage@rothershrine.org" className="font-semibold text-shrine-maroon-600 underline underline-offset-2">pilgrimage@rothershrine.org</a>
+            </div>
+          </Reveal>
         </Container>
       </section>
     </div>
