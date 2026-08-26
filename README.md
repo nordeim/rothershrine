@@ -32,17 +32,17 @@ Every row below is implemented — no placeholders.
 
 | Layer | Technology | Version | Purpose |
 |---|---|---|---|
-| UI | React | `19.2.6` | Functional components + hooks only |
+| UI | React | `19.2.8` | Functional components + hooks only |
 | Routing | React Router | `7.18.2` | `HashRouter` + `Layout` outlet + alias routes |
-| Build | Vite | `7.3.2` | HMR dev, single-file prod build |
-| Styling | Tailwind CSS + `@tailwindcss/vite` | `4.1.17` | CSS-first `@theme` tokens in `src/index.css` |
+| Build | Vite | `7.3.6` | HMR dev, single-file prod build (+ `@vitejs/plugin-react 5.2.0`) |
+| Styling | Tailwind CSS + `@tailwindcss/vite` | `4.3.3` / `4.1.17` | CSS-first `@theme` tokens in `src/index.css` |
 | Language | TypeScript | `5.9.3` | `strict` + `noUnusedLocals/Params`, `bundler` mode, `@` alias |
 | Icons | lucide-react | `1.34.0` | Header/footer + page iconography |
-| Utils | clsx + tailwind-merge | `2.1.1` / `3.4.0` | `cn()` class merging |
-| Bundling | vite-plugin-singlefile | `2.3.0` | Inlines all assets into one `index.html` |
+| Utils | clsx + tailwind-merge | `2.1.1` / `3.6.0` | `cn()` class merging |
+| Bundling | vite-plugin-singlefile | `2.3.3` | Inlines JS+CSS into `dist/index.html` (`public/images/` copied to `dist/images/`) |
 | Fonts | Google Fonts | — | `Fraunces` (display) + `Source Sans 3` (body) via `index.html` |
 
-Versions match `package.json` / `package-lock.json`.
+Versions pinned exact in `package.json` and match `pnpm-lock.yaml` (`--frozen-lockfile` in CI) + `package-lock.json`.
 
 ### System Diagram
 
@@ -55,8 +55,8 @@ flowchart TB
   L --> F[Footer — 4-col + divider-weave]
   P --> D[src/data/nav.ts + content.ts]
   H & F & P --> S[Tailwind @theme — src/index.css]
-  R --> V[Vite 7 + viteSingleFile]
-  V --> O[dist/index.html — single file]
+  R --> V[Vite 7.3.6 + viteSingleFile 2.3.3]
+  V --> O[dist/index.html + dist/images/ — primary single file + public assets]
   O --> G[GitHub Pages / S3]
 ```
 
@@ -71,7 +71,7 @@ flowchart TB
 ├── 📄 tsconfig.json         # ES2020 / ESNext / bundler / strict / @/* paths
 ├── 📄 package.json          # scripts: dev / build / preview
 ├── 📂 public/
-│   └── 📂 images/           # hero-shrine.jpg, shepherd-emblem.jpg — ref as /images/*.jpg
+│   └── 📂 images/           # hero-shrine.jpg + shepherd-emblem.jpg via /images/*.jpg (Vite publicDir → dist/images/); whatToSee cards use Pexels CDN URLs in src/data/content.ts
 ├── 📂 src/
 │   ├── 📄 App.tsx           # HashRouter + 15 routes (7 alias pairs + 3 hash anchors + *)
 │   ├── 📄 main.tsx          # StrictMode + createRoot
@@ -102,17 +102,17 @@ flowchart TB
 # 1 — Clone
 git clone <repo-url> rothershrine && cd rothershrine
 
-# 2 — Install
-pnpm install
-# or: npm install
+# 2 — Install (deterministic)
+pnpm install --frozen-lockfile
+# or: npm ci
 
 # 3 — Run (HMR)
 pnpm dev
 # → Local: http://localhost:5173
 
-# 4 — Production build (single file)
+# 4 — Production build (single file + public assets)
 pnpm build
-# → dist/index.html  ~367 kB (gzip ~107 kB), all assets inlined
+# → dist/index.html  ~370 kB (gzip ~108 kB), JS+CSS inlined; dist/images/ copied from public/
 
 # Preview prod build
 pnpm preview
@@ -131,7 +131,7 @@ ls -lh dist/index.html    # expect: single HTML file, no separate assets chunk
 |---|---|
 | `pnpm dev` | Vite ready on `:5173`, HMR active |
 | `npx tsc --noEmit` | Exit `0`, no errors |
-| `pnpm build` | `dist/index.html` exists, gzip ~107 kB |
+| `pnpm build` | `dist/index.html` exists (~370 kB, gzip ~108 kB) + `dist/images/` |
 | `pnpm preview` | Prod preview on `:4173`, all alias routes + `#hash` anchors navigate |
 
 ## Design System
@@ -158,12 +158,12 @@ Tokens live in `src/index.css` `@theme`. Extend there — never use arbitrary `b
 
 ## Deployment
 
-Single-file deploy — no server, no env vars, no rewrites needed.
+Primary artifact `dist/index.html` (+ `dist/images/`) — no server, no env vars, no rewrites needed.
 
 ```bash
-pnpm build                # produces dist/index.html
-# GitHub Pages — push dist/index.html to gh-pages or serve dist/ as artifact
-# S3 / CloudFront — upload dist/index.html as index.html
+pnpm build                # produces dist/index.html + dist/images/ (publicDir copy — singlefile inlines JS+CSS, not public/)
+# GitHub Pages — push dist/index.html + dist/images/ to gh-pages or serve dist/ as artifact
+# S3 / CloudFront — upload dist/index.html as index.html + dist/images/ assets
 pnpm preview              # smoke-test before publish
 ```
 

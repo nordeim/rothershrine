@@ -3,11 +3,11 @@ name: rothershrine
 display_name: Blessed Stanley Rother Shrine — National Shrine, Oklahoma City
 version: 1.0.0
 last_updated: 2026-08-26
-project_state: static SPA — 0 tests, tsc + build green, singlefile deploy
-stack: react 19.2.6 / vite 7.3.2 / tailwind 4.1.17 / typescript 5.9.3 / react-router 7.18.2
+project_state: static SPA — 0 tests, tsc + build green, singlefile deploy (pinned)
+stack: react 19.2.8 / vite 7.3.6 / tailwind 4.3.3 (@tailwindcss/vite 4.1.17) / typescript 5.9.3 / react-router 7.18.2 / singlefile 2.3.3
 rendering: static SPA (HashRouter, no SSR)
 data_layer: file-backed typed arrays in src/data/*
-deploy: vite-plugin-singlefile → dist/index.html → GH Pages / S3
+deploy: vite-plugin-singlefile → dist/index.html + dist/images/ → GH Pages / S3 (publicDir copy — not inlined)
 ---
 
 # `rothershrine` — Engineering Skill
@@ -68,17 +68,17 @@ deploy: vite-plugin-singlefile → dist/index.html → GH Pages / S3
 
 | Layer | Technology | Locked Version | Critical Note |
 |---|---|---|---|
-| UI Runtime | `react` / `react-dom` | `19.2.6` | Hooks-only, no class components; `StrictMode` in `src/main.tsx` |
+| UI Runtime | `react` / `react-dom` | `19.2.8` | Hooks-only, no class components; `StrictMode` in `src/main.tsx` |
 | Routing | `react-router-dom` | `7.18.2` | `HashRouter` intentionally for static hosts; see ADR-1 |
-| Build | `vite` / `@vitejs/plugin-react` | `7.3.2` / `5.1.1` | Node ≥20 required; HMR default; alias `@→src/` |
-| Styling | `tailwindcss` / `@tailwindcss/vite` | `4.1.17` / `4.1.17` | **CSS-first `@theme` inline** — no `tailwind.config.*`; tokens in `src/index.css` |
-| Language | `typescript` / `@types/react` / `@types/react-dom` / `@types/node` | `5.9.3` / `19.2.7` / `19.2.3` / `22.19.17` | `strict` + `noUnusedLocals/Params` — breaches fail `tsc` |
+| Build | `vite` / `@vitejs/plugin-react` | `7.3.6` / `5.2.0` | Node ≥20 required; HMR default; alias `@→src/` |
+| Styling | `tailwindcss` / `@tailwindcss/vite` | `4.3.3` / `4.1.17` | **CSS-first `@theme` inline** — no `tailwind.config.*`; tokens in `src/index.css` |
+| Language | `typescript` / `@types/react` / `@types/react-dom` / `@types/node` | `5.9.3` / `19.2.18` / `19.2.5` / `22.20.1` | `strict` + `noUnusedLocals/Params` — breaches fail `tsc` |
 | Icons | `lucide-react` | `1.34.0` | Header/footer + `Home` quick-facts |
-| Utils | `clsx` / `tailwind-merge` | `2.1.1` / `3.4.0` | `cn()` = `twMerge(clsx(...))` — only merge path |
-| Bundling | `vite-plugin-singlefile` | `2.3.0` | Inlines all chunks into `dist/index.html` (~367 kB) |
+| Utils | `clsx` / `tailwind-merge` | `2.1.1` / `3.6.0` | `cn()` = `twMerge(clsx(...))` — only merge path |
+| Bundling | `vite-plugin-singlefile` | `2.3.3` | Inlines JS+CSS into `dist/index.html` (~370 kB, gzip ~108 kB; `public/images/` → `dist/images/`) |
 | Fonts | Google Fonts (CDN, `index.html`) | — | `Fraunces` 400/500/600/700 + `Source Sans 3` 400/500/600/700; no runtime loader |
 
-**Environment:** No `.env.example`, no DB, no auth, no `docker`/`compose`. `pnpm` preferred, `npm` works. `skills/` is a symlink to `~/.pi/agent/skills` (ignored).
+**Environment:** No `.env.example`, no DB, no auth, no `docker`/`compose`. `pnpm` preferred (`--frozen-lockfile` in CI — versions pinned exact in `package.json`), `npm` works via `npm ci`. `skills/` is a symlink to `~/.pi/agent/skills` (ignored).
 
 ---
 
@@ -88,9 +88,10 @@ deploy: vite-plugin-singlefile → dist/index.html → GH Pages / S3
 
 ```bash
 git clone <repo-url> rothershrine && cd rothershrine
-pnpm install            # or npm install
+pnpm install --frozen-lockfile  # deterministic — versions pinned exact in package.json
+# or: npm ci
 pnpm dev                # → http://localhost:5173 (Vite HMR)
-pnpm build              # → dist/index.html (viteSingleFile inlines JS+CSS)
+pnpm build              # → dist/index.html + dist/images/ (viteSingleFile inlines JS+CSS; publicDir copied)
 pnpm preview            # → http://localhost:4173 (preview dist)
 npx tsc --noEmit        # type gate — must be silent
 ```
@@ -384,11 +385,11 @@ Each entry: symptom → root cause → fix → lesson. Severity: `Critical` (bre
 | `Cannot find module '@/utils/cn'` | Alias desync (see §9 #5) | Align `vite.config.ts` ↔ `tsconfig.json` `paths @/*`; restart Vite |
 | `npx tsc --noEmit` → `TS6133 'x' is declared but never used` | `noUnusedLocals`/`Params` | Remove import or use it; for intentionally unused param, prefix `_` (e.g., `_idx`) |
 | Hash anchor lands at top (`/#what-to-see#pilgrim-center`) | Target `id` missing or `Layout` effect stale | Verify `id="pilgrim-center"` in `WhatToSee.tsx`; check `Layout` `useEffect` deps `[pathname, hash]` |
-| `pnpm build` → `dist/index.html` is 2+ files | `viteSingleFile` misordered or removed | Verify `plugins: [react(), tailwindcss(), viteSingleFile()]` order; check `dist/` is one HTML file |
+| `pnpm build` → `dist/index.html` missing or not inlined | `viteSingleFile` misordered or removed | Verify `plugins: [react(), tailwindcss(), viteSingleFile()]` order; check `dist/index.html` exists and `Inlining: index-*.js` in log; `dist/images/` alongside is expected (publicDir copy) |
 | Styles missing locally but build works | `@import "tailwindcss"` order wrong | `@import` must be first line of `src/index.css` |
 | Fonts not loading | `index.html` preconnect or href typo | Verify `fonts.googleapis.com` preconnect + `Fraunces`/`Source Sans 3` href intact |
 | GH Pages deep-link 404 on refresh | Switched to `BrowserRouter` | Revert to `HashRouter` or add `404.html` SPA redirect |
-| Image 404 (`/images/hero-shrine.jpg`) | Wrong public path | Images belong in `public/images/` and ref as `/images/…` (absolute from root) |
+| Image 404 (`/images/hero-shrine.jpg`) | Wrong public path or missing `dist/images/` on deploy | Hero/emblem belong in `public/images/` and ref as `/images/…` (absolute from root; Vite copies to `dist/images/` — upload alongside `index.html`); whatToSee cards use Pexels CDN URLs in `content.ts` |
 
 **Live-site verification (post-deploy):**
 
@@ -406,17 +407,17 @@ Run in order — every step must be green before pushing `main` (`main` is the d
 
 ```bash
 npx tsc --noEmit               # 1 — type gate (no output = pass)
-pnpm build                     # 2 — singlefile build → dist/index.html (~367 kB, gzip ~107 kB)
+pnpm build                     # 2 — singlefile build → dist/index.html (~370 kB, gzip ~108 kB; + dist/images/)
 pnpm preview &                 # 3 — smoke: spot-check 10 routes + 4 hash anchors
-ls -lh dist/index.html         # 4 — confirm one file (no separate chunks)
+ls -lh dist/                   # 4 — confirm dist/index.html + dist/images/ (publicDir copy expected)
 # 5 — axe/Lighthouse a11y spot-check on Header + Home hero + FAQ
-git push origin main           # 6 — deploy (GH Pages / S3 upload of dist/index.html)
+git push origin main           # 6 — deploy (GH Pages / S3 upload of dist/index.html + dist/images/)
 ```
 
 | Category | Check | How |
 |---|---|---|
 | Types | `npx tsc --noEmit` clean | `strict` + `noUnused*` pass |
-| Build | `pnpm build` greens | `viteSingleFile` inlines JS + CSS |
+| Build | `pnpm build` greens | `viteSingleFile` inlines JS + CSS; `dist/images/` copied from `public/` (not inlined) |
 | Routes | All 10 pages + 7 alias paths + 4 hash anchors navigate | Manual or `agent-browser` smoke |
 | A11y | Contrast ≥4.5:1 on body, `alt` on content images, `aria-expanded` on toggle | Spot-check per §8 table |
 | Visual | Hero gradients + `shadow-shrine` + `divider-weave` render | Preview comparison |
@@ -742,7 +743,7 @@ export function cn(...inputs: ClassValue[]): string; // twMerge(clsx(...))
 | # | Decision | Rationale | Consequence |
 |---|---|---|---|
 | ADR-1 | `HashRouter` over `BrowserRouter` | Zero-config deploy to GH Pages/S3 — no server rewrites; deep-links survive refresh | URLs contain `/#/` — acceptable for a brochure SPA; `404.html` shim required if migrating to `BrowserRouter` |
-| ADR-2 | `vite-plugin-singlefile` | One `dist/index.html` artifact — trivial upload, no asset path breakage | No code-splitting; dynamic `import()` inlines; keep bundle ≤400 kB |
+| ADR-2 | `vite-plugin-singlefile` | Primary `dist/index.html` (+ `dist/images/` public copy) — trivial upload, no asset path breakage | Singlefile inlines JS+CSS only; `publicDir` is copied; no code-splitting; keep `index.html` ≤400 kB |
 | ADR-3 | Tailwind v4 CSS-first `@theme` | Tokens co-located with CSS, no `tailwind.config.*` drift; `index.css` is the palette | Extend `@theme` only, never arbitrary hex |
 | ADR-4 | File-backed `src/data/*` (no CMS) | Typed arrays are enough for 20 items; CMS adds auth/ISR without benefit | Keep `content.ts` as fallback if CMS is introduced behind `src/lib/cms/` |
 | ADR-5 | Alias `@→src/` sync contract | Short imports (`@/utils/cn`) without relative `../../../` | Two-file change (`vite.config.ts` + `tsconfig.json` `paths` + `include`) |
@@ -800,7 +801,7 @@ This project follows **ANALYZE → PLAN → VALIDATE → IMPLEMENT → VERIFY �
 | Content arrays (5) | `src/data/content.ts` |
 | Primitive: Button/Container/SectionHeading | `src/components/ui/*.tsx` |
 | Merge helper | `src/utils/cn.ts` |
-| Images | `public/images/*.jpg` |
+| Images | `public/images/*.jpg` (hero/emblem via `/images/` → `dist/images/`) + Pexels CDN for whatToSee cards |
 | Vite alias + singlefile | `vite.config.ts` |
 | TS strict + include | `tsconfig.json` |
-| Pre-ship gate | `npx tsc --noEmit && pnpm build` → `pnpm preview` |
+| Pre-ship gate | `npx tsc --noEmit && pnpm build` (370kB/108kB + dist/images/) → `pnpm preview` |

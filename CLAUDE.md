@@ -6,7 +6,7 @@ IMPORTANT: File is read fresh for every conversation. Be brief and practical.
 
 Clone / pilgrimage site for the **National Shrine of Blessed Stanley Rother** (Oklahoma City). Tells the story of the Oklahoma farm boy turned missionary martyr in Santiago Atitlán, Guatemala — martyred July 28, 1981, beatified Sept 23, 2017 — and guides pilgrims through the Pilgrim Center, Shrine Church & Tomb Chapel, and Tepeyac Hill.
 
-**Stack:** React 19 + Vite 7 + Tailwind CSS v4 (`@tailwindcss/vite`) + TypeScript 5.9 (strict) + React Router 7 (HashRouter) + `vite-plugin-singlefile` (single-HTML deploy) · pnpm preferred · Alias `@` → `src/`
+**Stack:** React 19.2.8 + Vite 7.3.6 + Tailwind CSS 4.3.3 (`@tailwindcss/vite 4.1.17`) + TypeScript 5.9.3 (strict) + React Router 7.18.2 (HashRouter) + `vite-plugin-singlefile 2.3.3` (primary `dist/index.html` + `dist/images/`) · pnpm preferred (`--frozen-lockfile` in CI) · Alias `@` → `src/` · versions pinned exact in `package.json`
 
 > `README.md` is the visitor-facing overview; this file is the authoritative agent onboarding doc. Keep both in sync with `package.json`, `vite.config.ts`, and `tsconfig.json`.
 
@@ -95,8 +95,9 @@ Apply to every non-trivial task. Do not skip VALIDATE.
 ### Environment Setup
 
 ```bash
-# Node 20+ required (Vite 7). pnpm preferred; npm works.
-pnpm install          # or npm install
+# Node 20+ required (Vite 7.3.6). pnpm preferred; npm works.
+pnpm install --frozen-lockfile  # deterministic (versions pinned exact in package.json)
+# or: npm ci
 cp .env.example .env.local 2>/dev/null || true  # no env vars required yet
 pnpm dev              # http://localhost:5173
 ```
@@ -192,7 +193,7 @@ npx tsc --noEmit && npm run build
 git push origin main
 ```
 
-Single-file output `dist/index.html` can be deployed directly to GitHub Pages (via `gh-pages` branch or `dist` artifact) or S3 — ensure hash routing remains (`HashRouter` avoids 404s on static hosts).
+Primary artifact `dist/index.html` (+ `dist/images/` copied from `public/` — `viteSingleFile` inlines JS+CSS, not `publicDir`) deploys directly to GitHub Pages (via `gh-pages` branch or `dist` artifact — upload both) or S3 — ensure hash routing remains (`HashRouter` avoids 404s on static hosts).
 
 ## Error Handling & Debugging
 
@@ -233,7 +234,7 @@ src/
   utils/
     cn.ts                # clsx + tailwind-merge
 public/
-  images/                # hero / emblem (served at /images/...)
+  images/                # hero-shrine.jpg + shepherd-emblem.jpg (served at /images/... → dist/images/); whatToSee cards use Pexels CDN URLs in content.ts
 ```
 
 - **Data ownership:** Narrative and exhibit data is typed in `content.ts` (`TimelineEntry`, `WhatToSeeSection`, `FaqItem`, `EventItem`, `GivingOption`). Pages render from these arrays — do not inline copy that belongs in `data/`.
@@ -245,7 +246,7 @@ public/
 - Components: `PascalCase.tsx` (e.g., `PageHero.tsx`); hooks: `useThing.ts`.
 - Data/utils: `camelCase.ts` (`content.ts`, `cn.ts`).
 - Pages: `PascalCase.tsx` matching route intent (`Pilgrimage.tsx`, `WhatToSee.tsx`).
-- Assets: `public/images/<slug>.jpg` — reference as `/images/<slug>.jpg` (absolute from root, works with single-file build + static hosting).
+- Assets: `public/images/<slug>.jpg` — hero/emblem reference as `/images/<slug>.jpg` (absolute from root, Vite `publicDir` → `dist/images/` — upload alongside `dist/index.html`; singlefile does not inline `public/`). WhatToSee cards use Pexels CDN URLs in `src/data/content.ts`.
 - Tests (future): `*.test.tsx` adjacent to source.
 
 ### Design System

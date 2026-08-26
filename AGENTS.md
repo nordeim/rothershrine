@@ -4,7 +4,7 @@
 
 ## Stack
 
-`React 19` + `Vite 7` + `Tailwind CSS v4` (`@tailwindcss/vite`, CSS-first `@theme` inline in `src/index.css`) + `TypeScript 5.9` strict + `React Router 7` `HashRouter` + `vite-plugin-singlefile` (single `dist/index.html` for GH Pages / S3) · alias `@` → `src/` (sync `vite.config.ts` ↔ `tsconfig.json` `paths`) · `pnpm` preferred, `npm` works
+`React 19.2.8` + `Vite 7.3.6` + `Tailwind CSS 4.3.3` (`@tailwindcss/vite 4.1.17`, CSS-first `@theme` inline in `src/index.css`) + `TypeScript 5.9.3` strict + `React Router 7.18.2` `HashRouter` + `vite-plugin-singlefile 2.3.3` (primary `dist/index.html` + `dist/images/` for GH Pages / S3) · alias `@` → `src/` (sync `vite.config.ts` ↔ `tsconfig.json` `paths`) · `pnpm` preferred (`--frozen-lockfile` for CI), `npm` works · versions pinned exact in `package.json` (re-pin on upgrade, update docs)
 
 ## Commands
 
@@ -32,13 +32,13 @@ src/
   pages/               # Home, AboutRother, History, WhatToSee, Pilgrimage, NewsEvents, Volunteer, Give, FAQ, NotFound
   data/                # nav.ts (primaryNav/footerNav — single source), content.ts (typed content arrays)
   utils/cn.ts          # twMerge(clsx) — always merge via cn()
-public/images/         # /images/<slug>.jpg — absolute refs, work with singlefile + static hosts
+public/images/         # hero-shrine.jpg + shepherd-emblem.jpg via /images/<slug>.jpg (Vite publicDir → dist/images/ — upload alongside dist/index.html); whatToSee cards use Pexels CDN URLs in src/data/content.ts
 ```
 
 ## Quirks — would break if guessed wrong
 
 - **HashRouter is intentional** — static hosts (GH Pages / S3) have no SPA fallback. Don't switch to `BrowserRouter` without adding a `404.html` redirect.
-- **`viteSingleFile()` inlines everything** — no assumed code-splitting. Dynamic `import()` that expects chunks will be inlined or break.
+- **`viteSingleFile()` inlines JS+CSS** — `public/images/` is still copied to `dist/images/` (Vite `publicDir` is not inlined; upload both). No assumed code-splitting. Dynamic `import()` that expects chunks will be inlined or break.
 - **Alias `@` must stay in sync** — `vite.config.ts` (`path.resolve(__dirname,"src")`) ↔ `tsconfig.json` (`paths: {"@/*":["src/*"]}`, `baseUrl:"."`) — change both.
 - **Tailwind v4 has no `tailwind.config.js`** — tokens live only in `src/index.css` `@theme`. Don't add arbitrary `bg-[#...]`; extend `@theme` with a named `shrine-*` token.
 - **TS strict will fail on unused code** — `noUnusedLocals:true` + `noUnusedParameters:true` + `noFallthroughCasesInSwitch:true` + `isolatedModules:true` + `noEmit:true`. Clean unused vars/params before commit.
